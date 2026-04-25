@@ -189,6 +189,7 @@
     let chartsPeriod   = 7;
     let chartInstances = [];
     let mobileTab      = 'today';
+    let draftsByDate   = {};
     let userProfile   = { weight: null, trackedMacros: DEFAULT_TRACKED, customNorms: {} };
     let viewDate      = getToday();
     let dayEntries    = [];
@@ -280,6 +281,9 @@
       loadDay();
       document.getElementById('textInput').addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addEntry(); }
+      });
+      document.getElementById('textInput').addEventListener('input', e => {
+        draftsByDate[viewDate] = e.target.value;
       });
       if (window.innerWidth >= 1024) {
         renderCharts();
@@ -456,7 +460,7 @@
     }
     async function loadDay() {
       setDayLoading(true);
-      document.getElementById('textInput').value = '';
+      document.getElementById('textInput').value = draftsByDate[viewDate] || '';
       setStatus('');
       try { const doc = await logRef(viewDate).get(); dayEntries = doc.exists ? (doc.data().entries || []) : []; }
       catch (_) { dayEntries = []; }
@@ -612,6 +616,7 @@
           parsed.name = document.getElementById('mealName').value.trim() || parsed.name;
           entry = makeEntry(parsed);
           document.getElementById('textInput').value = '';
+          delete draftsByDate[viewDate];
 
         } else if (currentTab === 'photo') {
           if (!currentPhotoBase64) { setStatus('Выбери фото', true); return; }
