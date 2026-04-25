@@ -63,11 +63,19 @@
       <div id="settingsContent"></div>
     </div>
 
+    <!-- Mobile tabs (hidden on desktop) -->
+    <div class="lg:hidden flex gap-1 mb-4 bg-gray-100 rounded-xl p-1">
+      <button onclick="switchMobileTab('today')" id="mtab-today"
+        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all bg-white shadow text-[#2C3A2D]">Сегодня</button>
+      <button onclick="switchMobileTab('charts')" id="mtab-charts"
+        class="flex-1 py-2 text-sm font-medium rounded-lg transition-all text-gray-400">Сводка</button>
+    </div>
+
     <!-- Two-column layout on desktop -->
     <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-8 lg:items-start">
 
       <!-- Left column: today -->
-      <div class="min-w-0">
+      <div id="leftColumn" class="min-w-0">
 
         <!-- Summary (rendered by JS) -->
         <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
@@ -78,7 +86,7 @@
               <div class="relative">
                 <button onclick="openCalendar()" class="text-gray-400 hover:text-[#B8975A] transition-colors text-base leading-none" title="Выбрать дату">&#128197;</button>
                 <input type="date" id="datePicker" onchange="jumpToDate(this.value)"
-                  class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                  class="absolute inset-0 opacity-0 pointer-events-none w-full h-full">
               </div>
             </div>
             <button onclick="changeDay(1)" id="btnNextDay" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-25 disabled:cursor-default">&#8594;</button>
@@ -137,16 +145,11 @@
       </div>
 
       <!-- Right column: charts (sticky on desktop) -->
-      <div class="lg:sticky lg:top-4 mt-4 lg:mt-0">
+      <div id="rightColumn" class="lg:sticky lg:top-4">
         <div class="hidden lg:flex items-center mb-3 px-1">
           <span class="font-display text-lg font-semibold text-[#2C3A2D]">Сводка за период</span>
         </div>
-        <button onclick="toggleCharts()"
-          class="lg:hidden w-full bg-white rounded-2xl px-4 py-3 shadow-sm border border-[#E5DDD2] text-sm text-gray-500 hover:text-[#3A5235] transition-colors flex items-center justify-between mb-2">
-          <span>Графики за период</span>
-          <span id="chartsArrow" class="transition-transform">&#9662;</span>
-        </button>
-        <div id="chartsContent" class="hidden lg:block"></div>
+        <div id="chartsContent"></div>
       </div>
 
     </div>
@@ -183,10 +186,10 @@
 
     // ── State ─────────────────────────────────────────────────────────────────
 
-    let currentUser   = null;
+    let currentUser    = null;
     let chartsPeriod   = 7;
-    let chartsVisible  = false;
     let chartInstances = [];
+    let mobileTab      = 'today';
     let userProfile   = { weight: null, trackedMacros: DEFAULT_TRACKED, customNorms: {} };
     let viewDate      = getToday();
     let dayEntries    = [];
@@ -279,7 +282,23 @@
       document.getElementById('textInput').addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addEntry(); }
       });
-      if (window.innerWidth >= 1024) renderCharts();
+      if (window.innerWidth >= 1024) {
+        renderCharts();
+      } else {
+        document.getElementById('rightColumn').style.display = 'none';
+      }
+    }
+
+    function switchMobileTab(tab) {
+      mobileTab = tab;
+      const isToday = tab === 'today';
+      document.getElementById('leftColumn').style.display  = isToday ? '' : 'none';
+      document.getElementById('rightColumn').style.display = isToday ? 'none' : '';
+      const active   = 'flex-1 py-2 text-sm font-medium rounded-lg transition-all bg-white shadow text-[#2C3A2D]';
+      const inactive = 'flex-1 py-2 text-sm font-medium rounded-lg transition-all text-gray-400';
+      document.getElementById('mtab-today').className  = isToday ? active : inactive;
+      document.getElementById('mtab-charts').className = isToday ? inactive : active;
+      if (!isToday && chartInstances.length === 0) renderCharts();
     }
 
     // ── Profile ───────────────────────────────────────────────────────────────
@@ -824,15 +843,6 @@
     }
 
     // ── Charts ────────────────────────────────────────────────────────────────
-
-    function toggleCharts() {
-      chartsVisible = !chartsVisible;
-      const content = document.getElementById('chartsContent');
-      const arrow   = document.getElementById('chartsArrow');
-      content.classList.toggle('hidden', !chartsVisible);
-      if (arrow) arrow.style.transform = chartsVisible ? 'rotate(180deg)' : '';
-      if (chartsVisible && chartInstances.length === 0) renderCharts();
-    }
 
     function setPeriod(days) {
       chartsPeriod = days;
