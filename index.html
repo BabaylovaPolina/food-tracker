@@ -456,6 +456,8 @@
     }
     async function loadDay() {
       setDayLoading(true);
+      document.getElementById('textInput').value = '';
+      setStatus('');
       try { const doc = await logRef(viewDate).get(); dayEntries = doc.exists ? (doc.data().entries || []) : []; }
       catch (_) { dayEntries = []; }
       renderLog(); updateTotals(); setDayLoading(false);
