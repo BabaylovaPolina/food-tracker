@@ -75,6 +75,16 @@
       <div id="summaryContent"></div>
     </div>
 
+    <!-- Charts section -->
+    <div id="chartsSection" class="mb-4">
+      <button onclick="toggleCharts()"
+        class="w-full bg-white rounded-2xl px-4 py-3 shadow-sm border border-rose-100 text-sm text-gray-500 hover:text-rose-600 transition-colors flex items-center justify-between">
+        <span>Графики за период</span>
+        <span id="chartsArrow" class="transition-transform">&#9662;</span>
+      </button>
+      <div id="chartsContent" class="hidden mt-2"></div>
+    </div>
+
     <!-- Input card -->
     <div id="inputCard" class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
       <!-- Meal name + suggestions -->
@@ -125,6 +135,7 @@
     <div id="foodLog" class="space-y-2 transition-opacity"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -144,11 +155,11 @@
     // ── Macro definitions ─────────────────────────────────────────────────────
 
     const MACROS = [
-      { key: 'calories', label: 'Калории',    unit: 'ккал', bg: 'bg-orange-50', text: 'text-orange-400', bar: 'bg-orange-400', defaultNorm: 2000, mult: null },
-      { key: 'proteins', label: 'Белки',      unit: 'г',    bg: 'bg-blue-50',   text: 'text-blue-500',  bar: 'bg-blue-400',   defaultNorm: 100,  mult: 1.6  },
-      { key: 'fats',     label: 'Жиры',       unit: 'г',    bg: 'bg-amber-50',  text: 'text-amber-500', bar: 'bg-amber-400',  defaultNorm: 60,   mult: 1.0  },
-      { key: 'carbs',    label: 'Углеводы',   unit: 'г',    bg: 'bg-purple-50', text: 'text-purple-500',bar: 'bg-purple-400', defaultNorm: 250,  mult: null },
-      { key: 'fiber',    label: 'Клетчатка',  unit: 'г',    bg: 'bg-green-50',  text: 'text-green-500', bar: 'bg-green-400',  defaultNorm: 25,   mult: null },
+      { key: 'calories', label: 'Калории',    unit: 'ккал', color: '#fb923c', bg: 'bg-orange-50', text: 'text-orange-400', bar: 'bg-orange-400', defaultNorm: 2000, mult: null },
+      { key: 'proteins', label: 'Белки',      unit: 'г',    color: '#3b82f6', bg: 'bg-blue-50',   text: 'text-blue-500',  bar: 'bg-blue-400',   defaultNorm: 100,  mult: 1.6  },
+      { key: 'fats',     label: 'Жиры',       unit: 'г',    color: '#f59e0b', bg: 'bg-amber-50',  text: 'text-amber-500', bar: 'bg-amber-400',  defaultNorm: 60,   mult: 1.0  },
+      { key: 'carbs',    label: 'Углеводы',   unit: 'г',    color: '#a855f7', bg: 'bg-purple-50', text: 'text-purple-500',bar: 'bg-purple-400', defaultNorm: 250,  mult: null },
+      { key: 'fiber',    label: 'Клетчатка',  unit: 'г',    color: '#22c55e', bg: 'bg-green-50',  text: 'text-green-500', bar: 'bg-green-400',  defaultNorm: 25,   mult: null },
     ];
 
     const DEFAULT_TRACKED = ['proteins', 'fats', 'fiber'];
@@ -156,6 +167,9 @@
     // ── State ─────────────────────────────────────────────────────────────────
 
     let currentUser   = null;
+    let chartsPeriod   = 7;
+    let chartsVisible  = false;
+    let chartInstances = [];
     let userProfile   = { weight: null, trackedMacros: DEFAULT_TRACKED, customNorms: {} };
     let viewDate      = getToday();
     let dayEntries    = [];
@@ -789,6 +803,126 @@
               class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-semibold py-2 rounded-xl transition-colors">Отмена</button>
           </div>
         </div>`;
+    }
+
+    // ── Charts ────────────────────────────────────────────────────────────────
+
+    function toggleCharts() {
+      chartsVisible = !chartsVisible;
+      const content = document.getElementById('chartsContent');
+      const arrow   = document.getElementById('chartsArrow');
+      content.classList.toggle('hidden', !chartsVisible);
+      arrow.style.transform = chartsVisible ? 'rotate(180deg)' : '';
+      if (chartsVisible) renderCharts();
+    }
+
+    function setPeriod(days) {
+      chartsPeriod = days;
+      renderCharts();
+    }
+
+    async function loadPeriodData(days) {
+      const dates = [];
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        dates.push(_fmt(d.getFullYear(), d.getMonth() + 1, d.getDate()));
+      }
+      const docs = await Promise.all(dates.map(date => logRef(date).get()));
+      return dates.map((date, idx) => {
+        const entries = docs[idx].exists ? (docs[idx].data().entries || []) : [];
+        const totals = {};
+        MACROS.forEach(m => { totals[m.key] = entries.reduce((s, e) => s + (e[m.key] ?? 0), 0); });
+        return { date, totals };
+      });
+    }
+
+    function destroyCharts() {
+      chartInstances.forEach(c => c.destroy());
+      chartInstances = [];
+    }
+
+    async function renderCharts() {
+      destroyCharts();
+      const content = document.getElementById('chartsContent');
+      const periods = [7, 14, 30];
+      const btnHtml = periods.map(p => {
+        const active = p === chartsPeriod;
+        return `<button onclick="setPeriod(${p})" id="period-${p}"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${active ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">${p} дней</button>`;
+      }).join('');
+
+      content.innerHTML = `
+        <div class="flex gap-1 mb-3">${btnHtml}</div>
+        <div id="chartsGrid" class="space-y-3">
+          <div class="text-center text-sm text-gray-400 py-4">Загрузка...</div>
+        </div>`;
+
+      let periodData;
+      try { periodData = await loadPeriodData(chartsPeriod); }
+      catch (_) {
+        document.getElementById('chartsGrid').innerHTML =
+          '<div class="text-center text-sm text-red-400 py-4">Не удалось загрузить данные</div>';
+        return;
+      }
+
+      const tracked = getTrackedMacros();
+      const labels  = periodData.map(({ date }) => {
+        const [, m, d] = date.split('-');
+        return `${d}.${m}`;
+      });
+
+      const grid = document.getElementById('chartsGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      tracked.forEach(macro => {
+        const norm = getNorm(macro.key);
+        const normLabel = norm ? ` · норма ${norm}${macro.unit}` : '';
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl p-3 shadow-sm border border-rose-100';
+        card.innerHTML = `
+          <div class="text-xs font-medium text-gray-600 mb-2">${macro.label}${normLabel}</div>
+          <div class="relative h-40"><canvas id="chart-${macro.key}"></canvas></div>`;
+        grid.appendChild(card);
+
+        const ctx = card.querySelector(`#chart-${macro.key}`).getContext('2d');
+        const data = periodData.map(({ totals }) => totals[macro.key]);
+        const datasets = [{
+          data,
+          borderColor: macro.color,
+          backgroundColor: macro.color + '20',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+        }];
+        if (norm) {
+          datasets.push({
+            data: periodData.map(() => norm),
+            borderColor: 'rgba(239,68,68,0.5)',
+            borderDash: [5, 4],
+            borderWidth: 1.5,
+            pointRadius: 0,
+            fill: false,
+          });
+        }
+        chartInstances.push(new Chart(ctx, {
+          type: 'line',
+          data: { labels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: {
+              callbacks: { label: ctx => `${ctx.parsed.y}${macro.unit}` }
+            }},
+            scales: {
+              x: { ticks: { font: { size: 10 }, maxRotation: 0 }, grid: { display: false } },
+              y: { min: 0, ticks: { font: { size: 10 } }, grid: { color: 'rgba(0,0,0,0.04)' } },
+            },
+          },
+        }));
+      });
     }
 
     // ── Utils ─────────────────────────────────────────────────────────────────
