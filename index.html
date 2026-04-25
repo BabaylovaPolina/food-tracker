@@ -396,12 +396,20 @@
 
     // ── Date nav ──────────────────────────────────────────────────────────────
 
-    function getToday() { return new Date().toISOString().split('T')[0]; }
+    function getToday() {
+      const d = new Date();
+      return _fmt(d.getFullYear(), d.getMonth() + 1, d.getDate());
+    }
+
+    function _fmt(y, m, d) {
+      return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    }
 
     function changeDay(delta) {
-      const d = new Date(viewDate + 'T00:00:00');
-      d.setDate(d.getDate() + delta);
-      const next = d.toISOString().split('T')[0];
+      const [y, m, d] = viewDate.split('-').map(Number);
+      const date = new Date(y, m - 1, d);
+      date.setDate(date.getDate() + delta);
+      const next = _fmt(date.getFullYear(), date.getMonth() + 1, date.getDate());
       if (next > getToday()) return;
       viewDate = next; editingId = null;
       updateDateDisplay(); loadDay();
@@ -409,8 +417,8 @@
 
     function updateDateDisplay() {
       const today = getToday();
-      const yest = new Date(); yest.setDate(yest.getDate() - 1);
-      const yStr = yest.toISOString().split('T')[0];
+      const yestD = new Date(); yestD.setDate(yestD.getDate() - 1);
+      const yStr = _fmt(yestD.getFullYear(), yestD.getMonth() + 1, yestD.getDate());
       const d = new Date(viewDate + 'T00:00:00');
       const s = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
       document.getElementById('dateDisplay').textContent =
