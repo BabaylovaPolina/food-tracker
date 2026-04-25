@@ -84,9 +84,8 @@
             <div class="flex items-center gap-1.5">
               <div class="text-xs text-gray-500 font-medium" id="dateDisplay"></div>
               <div class="relative">
-                <button onclick="openCalendar()" class="text-gray-400 hover:text-[#B8975A] transition-colors text-base leading-none" title="Выбрать дату">&#128197;</button>
-                <input type="date" id="datePicker" onchange="jumpToDate(this.value)"
-                  class="absolute inset-0 opacity-0 pointer-events-none w-full h-full">
+                <label for="datePicker" class="text-gray-400 hover:text-[#B8975A] transition-colors text-base leading-none cursor-pointer" title="Выбрать дату">&#128197;</label>
+                <input type="date" id="datePicker" onchange="jumpToDate(this.value)" class="sr-only">
               </div>
             </div>
             <button onclick="changeDay(1)" id="btnNextDay" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-25 disabled:cursor-default">&#8594;</button>
