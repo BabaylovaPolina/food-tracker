@@ -4,14 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Дневник питания</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .font-display { font-family: 'Cormorant Garamond', Georgia, serif; letter-spacing: 0.06em; }
+  </style>
 </head>
-<body class="bg-rose-50 min-h-screen font-sans">
+<body class="bg-[#F5F1EB] min-h-screen font-sans">
 
   <!-- Auth screen -->
   <div id="authScreen" class="hidden max-w-sm mx-auto px-6 pt-20">
     <div class="text-center mb-10">
-      <h1 class="text-2xl font-bold text-rose-700">Дневник питания</h1>
+      <h1 class="text-3xl font-display font-semibold text-[#2C3A2D]">Дневник питания</h1>
       <p class="text-sm text-gray-400 mt-1">Войди, чтобы данные синхронизировались</p>
     </div>
     <button onclick="signInGoogle()"
@@ -31,16 +36,16 @@
     </div>
     <div class="space-y-2 mb-3">
       <input type="email" id="authEmail" placeholder="Email"
-        class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+        class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]">
       <input type="password" id="authPassword" placeholder="Пароль"
-        class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+        class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]"
         onkeydown="if(event.key==='Enter') signInEmail()">
     </div>
     <div class="flex gap-2">
       <button onclick="signInEmail()"
-        class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">Войти</button>
+        class="flex-1 bg-[#2C3A2D] hover:bg-[#1E2B1F] text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">Войти</button>
       <button onclick="registerEmail()"
-        class="flex-1 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold py-2.5 rounded-xl text-sm transition-colors">Регистрация</button>
+        class="flex-1 bg-white border border-[#D5C9BB] text-[#3A5235] hover:bg-[#EEE8DF] font-semibold py-2.5 rounded-xl text-sm transition-colors">Регистрация</button>
     </div>
     <div id="authError" class="hidden text-red-500 text-xs text-center mt-3"></div>
   </div>
@@ -49,23 +54,23 @@
   <div id="appScreen" class="hidden max-w-lg mx-auto p-4 pb-12">
 
     <div class="flex items-center justify-between mb-5">
-      <h1 class="text-xl font-bold text-rose-700">Дневник питания</h1>
+      <h1 class="text-2xl font-display font-semibold text-[#2C3A2D]">Дневник питания</h1>
       <button onclick="toggleSettings()" class="text-gray-400 hover:text-gray-600 text-xl px-1">&#9881;</button>
     </div>
 
     <!-- Settings panel (content rendered by JS) -->
-    <div id="settings" class="hidden bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
+    <div id="settings" class="hidden bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
       <div id="settingsContent"></div>
     </div>
 
     <!-- Summary (rendered by JS) -->
-    <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
+    <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
       <div class="flex items-center justify-between mb-4">
         <button onclick="changeDay(-1)" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">&#8592;</button>
         <div class="flex items-center gap-1.5">
           <div class="text-xs text-gray-500 font-medium" id="dateDisplay"></div>
           <div class="relative">
-            <button onclick="openCalendar()" class="text-gray-400 hover:text-rose-400 transition-colors text-base leading-none" title="Выбрать дату">&#128197;</button>
+            <button onclick="openCalendar()" class="text-gray-400 hover:text-[#B8975A] transition-colors text-base leading-none" title="Выбрать дату">&#128197;</button>
             <input type="date" id="datePicker" onchange="jumpToDate(this.value)"
               class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
           </div>
@@ -78,7 +83,7 @@
     <!-- Charts section -->
     <div id="chartsSection" class="mb-4">
       <button onclick="toggleCharts()"
-        class="w-full bg-white rounded-2xl px-4 py-3 shadow-sm border border-rose-100 text-sm text-gray-500 hover:text-rose-600 transition-colors flex items-center justify-between">
+        class="w-full bg-white rounded-2xl px-4 py-3 shadow-sm border border-[#E5DDD2] text-sm text-gray-500 hover:text-[#3A5235] transition-colors flex items-center justify-between">
         <span>Графики за период</span>
         <span id="chartsArrow" class="transition-transform">&#9662;</span>
       </button>
@@ -86,22 +91,22 @@
     </div>
 
     <!-- Input card -->
-    <div id="inputCard" class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
+    <div id="inputCard" class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
       <!-- Meal name + suggestions -->
       <div class="mb-3">
         <div class="flex gap-1.5 flex-wrap mb-2">
-          <button onclick="setMealName('Завтрак')" id="suggest-Завтрак" class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-rose-50 text-rose-600 hover:bg-rose-100">Завтрак</button>
-          <button onclick="setMealName('Обед')"    id="suggest-Обед"    class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-rose-50 text-rose-600 hover:bg-rose-100">Обед</button>
-          <button onclick="setMealName('Ужин')"    id="suggest-Ужин"    class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-rose-50 text-rose-600 hover:bg-rose-100">Ужин</button>
-          <button onclick="setMealName('Перекус')" id="suggest-Перекус" class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-rose-50 text-rose-600 hover:bg-rose-100">Перекус</button>
+          <button onclick="setMealName('Завтрак')" id="suggest-Завтрак" class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Завтрак</button>
+          <button onclick="setMealName('Обед')"    id="suggest-Обед"    class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Обед</button>
+          <button onclick="setMealName('Ужин')"    id="suggest-Ужин"    class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Ужин</button>
+          <button onclick="setMealName('Перекус')" id="suggest-Перекус" class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Перекус</button>
         </div>
         <input type="text" id="mealName" placeholder="Или введи своё название"
           oninput="updateSuggestionButtons()"
-          class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+          class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]">
       </div>
 
       <div class="flex gap-1 mb-4 bg-gray-100 rounded-xl p-1">
-        <button onclick="switchTab('text')"   id="tab-text"   class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-rose-600">Текст</button>
+        <button onclick="switchTab('text')"   id="tab-text"   class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-[#3A5235]">Текст</button>
         <button onclick="switchTab('photo')"  id="tab-photo"  class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Фото</button>
         <button onclick="switchTab('manual')" id="tab-manual" class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Вручную</button>
       </div>
@@ -109,12 +114,12 @@
       <div id="panel-text">
         <textarea id="textInput" rows="3"
           placeholder="Например: 200г куриной грудки и 150г гречки&#10;Enter — добавить, Shift+Enter — новая строка"
-          class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none"></textarea>
+          class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A] resize-none"></textarea>
       </div>
 
       <div id="panel-photo" class="hidden">
         <div id="photoDropZone" onclick="document.getElementById('photoInput').click()"
-          class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-rose-300 transition-colors">
+          class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-[#C4B5A0] transition-colors">
           <div id="photoPlaceholder"><div class="text-4xl mb-2">&#128247;</div><div class="text-sm text-gray-400">Нажмите, чтобы выбрать фото</div></div>
           <img id="photoPreview" class="hidden max-h-52 mx-auto rounded-lg object-contain">
         </div>
@@ -126,7 +131,7 @@
       </div>
 
       <button onclick="addEntry()" id="submitBtn"
-        class="w-full mt-3 bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white font-semibold py-2.5 rounded-xl transition-colors text-sm">
+        class="w-full mt-3 bg-[#2C3A2D] hover:bg-[#1E2B1F] active:bg-[#141E15] text-white font-semibold py-2.5 rounded-xl transition-colors text-sm">
         Добавить
       </button>
       <div id="statusMsg" class="hidden text-center text-xs mt-2"></div>
@@ -155,11 +160,11 @@
     // ── Macro definitions ─────────────────────────────────────────────────────
 
     const MACROS = [
-      { key: 'calories', label: 'Калории',    unit: 'ккал', color: '#fb923c', bg: 'bg-orange-50', text: 'text-orange-400', bar: 'bg-orange-400', defaultNorm: 2000, mult: null },
-      { key: 'proteins', label: 'Белки',      unit: 'г',    color: '#3b82f6', bg: 'bg-blue-50',   text: 'text-blue-500',  bar: 'bg-blue-400',   defaultNorm: 100,  mult: 1.6  },
-      { key: 'fats',     label: 'Жиры',       unit: 'г',    color: '#f59e0b', bg: 'bg-amber-50',  text: 'text-amber-500', bar: 'bg-amber-400',  defaultNorm: 60,   mult: 1.0  },
-      { key: 'carbs',    label: 'Углеводы',   unit: 'г',    color: '#a855f7', bg: 'bg-purple-50', text: 'text-purple-500',bar: 'bg-purple-400', defaultNorm: 250,  mult: null },
-      { key: 'fiber',    label: 'Клетчатка',  unit: 'г',    color: '#22c55e', bg: 'bg-green-50',  text: 'text-green-500', bar: 'bg-green-400',  defaultNorm: 25,   mult: null },
+      { key: 'calories', label: 'Калории',   unit: 'ккал', color: '#B8742A', bg: 'bg-[#FBF6EF]', text: 'text-[#9A6028]', bar: 'bg-[#B8742A]', defaultNorm: 2000, mult: null },
+      { key: 'proteins', label: 'Белки',     unit: 'г',    color: '#4A7242', bg: 'bg-[#EFF4EE]', text: 'text-[#3D5E38]', bar: 'bg-[#4A7242]', defaultNorm: 100,  mult: 1.6  },
+      { key: 'fats',     label: 'Жиры',      unit: 'г',    color: '#A88040', bg: 'bg-[#F8F3EC]', text: 'text-[#8A6830]', bar: 'bg-[#A88040]', defaultNorm: 60,   mult: 1.0  },
+      { key: 'carbs',    label: 'Углеводы',  unit: 'г',    color: '#7A5872', bg: 'bg-[#F4EFF3]', text: 'text-[#6B4A65]', bar: 'bg-[#7A5872]', defaultNorm: 250,  mult: null },
+      { key: 'fiber',    label: 'Клетчатка', unit: 'г',    color: '#567860', bg: 'bg-[#EEF3EF]', text: 'text-[#486850]', bar: 'bg-[#567860]', defaultNorm: 25,   mult: null },
     ];
 
     const DEFAULT_TRACKED = ['proteins', 'fats', 'fiber'];
@@ -325,13 +330,13 @@
       document.getElementById('settingsContent').innerHTML = `
         <div class="flex items-center justify-between mb-4">
           <div class="text-sm text-gray-600 truncate pr-2">Вы вошли как <span class="font-medium">${escHtml(user?.displayName || user?.email || '')}</span></div>
-          <button onclick="signOut()" class="text-xs text-rose-500 hover:text-rose-700 shrink-0">Выйти</button>
+          <button onclick="signOut()" class="text-xs text-[#3A5235] hover:text-[#2C3A2D] shrink-0">Выйти</button>
         </div>
 
         <div class="border-t border-gray-100 pt-3 mb-3">
           <label class="block text-sm font-medium text-gray-700 mb-1">Вес (кг)</label>
           <input type="number" id="s-weight" value="${userProfile.weight || ''}" placeholder="60" min="30" max="300"
-            class="w-32 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+            class="w-32 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]">
         </div>
 
         <div class="border-t border-gray-100 pt-3 mb-3">
@@ -340,13 +345,13 @@
             ${MACROS.map(m => `
               <div class="flex items-center gap-2">
                 <input type="checkbox" id="s-cb-${m.key}" ${userProfile.trackedMacros.includes(m.key) ? 'checked' : ''}
-                  class="w-4 h-4 accent-rose-500">
+                  class="w-4 h-4 accent-[#2C3A2D]">
                 <label for="s-cb-${m.key}" class="text-sm text-gray-700 w-24">${m.label}</label>
                 <span class="text-xs text-gray-400">норма:</span>
                 <input type="number" id="s-norm-${m.key}" min="0"
                   value="${(userProfile.customNorms || {})[m.key] ?? ''}"
                   placeholder="${autoLabel(m)}"
-                  class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-rose-300">
+                  class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#B8975A]">
                 <span class="text-xs text-gray-400">${m.unit}</span>
               </div>
             `).join('')}
@@ -357,14 +362,14 @@
           <label class="block text-sm font-medium text-gray-700 mb-1">Gemini API ключ</label>
           <input type="password" id="apiKey" placeholder="AIza..."
             value="${localStorage.getItem('geminiApiKey') || ''}"
-            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]"
             oninput="saveApiKey()">
           <p class="text-xs text-gray-400 mt-1">Получить бесплатно: <a href="https://aistudio.google.com/apikey" target="_blank" class="underline">aistudio.google.com/apikey</a> · Хранится только в браузере</p>
         </div>
 
         <div class="flex items-center gap-3">
           <button onclick="saveSettingsForm()"
-            class="bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
+            class="bg-[#2C3A2D] hover:bg-[#1E2B1F] text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
             Сохранить
           </button>
           <span id="settings-saved" class="hidden text-xs text-green-600">Сохранено ✓</span>
@@ -390,10 +395,10 @@
           <div class="flex items-center justify-between mb-0.5">
             <label class="text-xs text-gray-500 pl-1">${m.label} (${m.unit})</label>
             <button onclick="toggleUnknownForm('${m.key}')" id="form-unk-btn-${m.key}"
-              class="text-xs text-gray-400 hover:text-rose-400 transition-colors px-1">не знаю</button>
+              class="text-xs text-gray-400 hover:text-[#B8975A] transition-colors px-1">не знаю</button>
           </div>
           <input type="number" id="form-${m.key}" placeholder="0" min="0"
-            class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+            class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]">
         </div>
       `).join('');
     }
@@ -457,10 +462,10 @@
         const btn = document.getElementById(`suggest-${s}`);
         if (!btn) return;
         const active = val === s;
-        btn.classList.toggle('bg-rose-500', active);
+        btn.classList.toggle('bg-[#2C3A2D]', active);
         btn.classList.toggle('text-white',  active);
-        btn.classList.toggle('bg-rose-50',  !active);
-        btn.classList.toggle('text-rose-600', !active);
+        btn.classList.toggle('bg-[#F5F1EB]',  !active);
+        btn.classList.toggle('text-[#3A5235]', !active);
       });
     }
 
@@ -516,8 +521,8 @@
       ['text','photo','manual'].forEach(t => {
         document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
         const btn = document.getElementById(`tab-${t}`);
-        if (t === tab) { btn.classList.add('bg-white','shadow','text-rose-600'); btn.classList.remove('text-gray-500'); }
-        else           { btn.classList.remove('bg-white','shadow','text-rose-600'); btn.classList.add('text-gray-500'); }
+        if (t === tab) { btn.classList.add('bg-white','shadow','text-[#3A5235]'); btn.classList.remove('text-gray-500'); }
+        else           { btn.classList.remove('bg-white','shadow','text-[#3A5235]'); btn.classList.add('text-gray-500'); }
       });
       setStatus('');
     }
@@ -685,7 +690,7 @@
         const total = totals[m.key];
         const uncapped = norm ? Math.round(total / norm * 100) : 0;
         const pct = m.key === 'proteins' ? Math.min(uncapped, 150) : Math.min(uncapped, 120);
-        const overColor = 'bg-red-400';
+        const overColor = 'bg-[#8B4040]';
         const barColor  = (pct > 110 && m.key !== 'proteins') ? overColor : m.bar;
         const normText  = norm ? `${total}${m.unit} / ${norm}${m.unit}` : `${total}${m.unit}`;
         return `
@@ -720,19 +725,19 @@
       const good = normedMacros.filter((m, i) => ratios[i] >= 0.9 && ratios[i] <= 1.1).map(m => m.label.toLowerCase());
 
       if (avg >= 0.9 && high.length === 0)
-        return { text: '🏆 Отличный день! Все нормы выполнены — так держать!', color: 'text-green-600' };
+        return { text: '🏆 Отличный день! Все нормы выполнены — так держать!', color: 'text-[#3D5E38]' };
       if (high.length > 0 && avg > 1.1)
-        return { text: `⚠️ Многовато: ${high.join(', ')}. Следи за балансом.`, color: 'text-red-500' };
+        return { text: `⚠️ Многовато: ${high.join(', ')}. Следи за балансом.`, color: 'text-[#8B4040]' };
       if (avg >= 0.7) {
         const parts = [];
         if (good.length)  parts.push(`хорошо с ${good.join(' и ')}`);
         if (low.length)   parts.push(`добавь ${low.join(' и ')}`);
         if (high.length)  parts.push(`чуть меньше ${high.join(' и ')}`);
-        return { text: '👍 ' + parts.join(', ').replace(/^./, c => c.toUpperCase()) + '.', color: 'text-amber-600' };
+        return { text: '👍 ' + parts.join(', ').replace(/^./, c => c.toUpperCase()) + '.', color: 'text-[#8A6030]' };
       }
       if (avg >= 0.4)
-        return { text: `💪 Продолжай! Нужно больше: ${low.join(', ')}.`, color: 'text-amber-500' };
-      return { text: '🍽 Сегодня очень мало съедено. Не забудь поесть!', color: 'text-rose-500' };
+        return { text: `💪 Продолжай! Нужно больше: ${low.join(', ')}.`, color: 'text-[#8A6030]' };
+      return { text: '🍽 Сегодня очень мало съедено. Не забудь поесть!', color: 'text-[#8A6030]' };
     }
 
     // ── Render log ────────────────────────────────────────────────────────────
@@ -760,7 +765,7 @@
       }).join('');
       const cols = tracked.length <= 3 ? `grid-cols-${tracked.length}` : tracked.length === 4 ? 'grid-cols-4' : 'grid-cols-3 sm:grid-cols-5';
       return `
-        <div class="bg-white rounded-2xl p-4 shadow-sm border border-rose-100">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-[#E5DDD2]">
           <div class="flex justify-between items-start">
             <div><div class="font-medium text-gray-800 text-sm">${escHtml(e.name)}</div>
               <div class="text-xs text-gray-400 mt-0.5">${e.time}</div></div>
@@ -782,23 +787,23 @@
           <div class="flex items-center justify-between mb-0.5">
             <label class="text-xs text-gray-500">${m.label}</label>
             <button onclick="toggleUnknownEdit(${e.id},'${m.key}')" id="edit-unk-btn-${m.key}-${e.id}"
-              class="text-xs ${isUnk ? 'text-rose-400' : 'text-gray-400'} hover:text-rose-400 transition-colors">${isUnk ? 'отменить' : 'не знаю'}</button>
+              class="text-xs ${isUnk ? 'text-rose-400' : 'text-gray-400'} hover:text-[#B8975A] transition-colors">${isUnk ? 'отменить' : 'не знаю'}</button>
           </div>
           <input type="number" id="edit-${m.key}-${e.id}" min="0"
             value="${isUnk ? '' : (e[m.key] ?? '')}"
             placeholder="${isUnk ? '—' : '0'}"
             ${isUnk ? 'disabled' : ''}
-            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 ${isUnk ? 'bg-gray-50' : ''}">
+            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A] ${isUnk ? 'bg-gray-50' : ''}">
         </div>`;
       }).join('');
       return `
-        <div class="bg-white rounded-2xl p-4 shadow-sm border border-blue-200">
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-[#C4B8A8]">
           <input type="text" id="edit-name-${e.id}" value="${escHtml(e.name)}"
-            class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium mb-3 focus:outline-none focus:ring-2 focus:ring-rose-300">
+            class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium mb-3 focus:outline-none focus:ring-2 focus:ring-[#B8975A]">
           <div class="grid ${cols} gap-2 mb-3">${fields}</div>
           <div class="flex gap-2">
             <button onclick="saveEdit(${e.id})"
-              class="flex-1 bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold py-2 rounded-xl transition-colors">Сохранить</button>
+              class="flex-1 bg-[#2C3A2D] hover:bg-[#1E2B1F] text-white text-sm font-semibold py-2 rounded-xl transition-colors">Сохранить</button>
             <button onclick="cancelEdit()"
               class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-semibold py-2 rounded-xl transition-colors">Отмена</button>
           </div>
@@ -849,7 +854,7 @@
       const btnHtml = periods.map(p => {
         const active = p === chartsPeriod;
         return `<button onclick="setPeriod(${p})" id="period-${p}"
-          class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${active ? 'bg-rose-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">${p} дней</button>`;
+          class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${active ? 'bg-[#2C3A2D] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">${p} дней</button>`;
       }).join('');
 
       content.innerHTML = `
@@ -880,7 +885,7 @@
         const norm = getNorm(macro.key);
         const normLabel = norm ? ` · норма ${norm}${macro.unit}` : '';
         const card = document.createElement('div');
-        card.className = 'bg-white rounded-2xl p-3 shadow-sm border border-rose-100';
+        card.className = 'bg-white rounded-2xl p-3 shadow-sm border border-[#E5DDD2]';
         card.innerHTML = `
           <div class="text-xs font-medium text-gray-600 mb-2">${macro.label}${normLabel}</div>
           <div class="relative h-40"><canvas id="chart-${macro.key}"></canvas></div>`;
