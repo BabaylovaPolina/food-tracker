@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дневник питания</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-rose-50 min-h-screen font-sans">
+
+  <div class="max-w-lg mx-auto p-4 pb-12">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-5">
+      <h1 class="text-xl font-bold text-rose-700">Дневник питания</h1>
+      <button onclick="toggleSettings()" class="text-gray-400 hover:text-gray-600 text-xl px-1" title="Настройки">&#9881;</button>
+    </div>
+
+    <!-- Settings panel -->
+    <div id="settings" class="hidden bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Anthropic API ключ</label>
+      <input type="password" id="apiKey" placeholder="sk-ant-..."
+        class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+        oninput="saveApiKey()">
+      <p class="text-xs text-gray-400 mt-1">Хранится только в вашем браузере</p>
+    </div>
+
+    <!-- Daily summary -->
+    <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
+      <div class="text-xs text-gray-400 mb-3">Сегодня, <span id="dateDisplay"></span></div>
+      <div class="grid grid-cols-4 gap-2 text-center">
+        <div>
+          <div class="text-2xl font-bold text-orange-400" id="totalCalories">0</div>
+          <div class="text-xs text-gray-400">ккал</div>
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-blue-500" id="totalProteins">0</div>
+          <div class="text-xs text-gray-400">белки г</div>
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-amber-500" id="totalFats">0</div>
+          <div class="text-xs text-gray-400">жиры г</div>
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-green-500" id="totalCarbs">0</div>
+          <div class="text-xs text-gray-400">углев. г</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input card -->
+    <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
+
+      <!-- Tabs -->
+      <div class="flex gap-1 mb-4 bg-gray-100 rounded-xl p-1">
+        <button onclick="switchTab('text')" id="tab-text"
+          class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-rose-600">
+          Текст
+        </button>
+        <button onclick="switchTab('photo')" id="tab-photo"
+          class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">
+          Фото
+        </button>
+        <button onclick="switchTab('manual')" id="tab-manual"
+          class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">
+          Вручную
+        </button>
+      </div>
+
+      <!-- Text panel -->
+      <div id="panel-text">
+        <textarea id="textInput" rows="3"
+          placeholder="Например: 200г куриной грудки на гриле и 150г гречки"
+          class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none"></textarea>
+      </div>
+
+      <!-- Photo panel -->
+      <div id="panel-photo" class="hidden">
+        <div id="photoDropZone" onclick="document.getElementById('photoInput').click()"
+          class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-rose-300 transition-colors">
+          <div id="photoPlaceholder">
+            <div class="text-4xl mb-2">&#128247;</div>
+            <div class="text-sm text-gray-400">Нажмите, чтобы выбрать фото</div>
+          </div>
+          <img id="photoPreview" class="hidden max-h-52 mx-auto rounded-lg object-contain">
+        </div>
+        <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)">
+      </div>
+
+      <!-- Manual panel -->
+      <div id="panel-manual" class="hidden">
+        <input type="text" id="manualName" placeholder="Название (необязательно)"
+          class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-rose-300">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-gray-500 pl-1">Калории (ккал)</label>
+            <input type="number" id="manualCalories" placeholder="0" min="0"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+          </div>
+          <div>
+            <label class="text-xs text-gray-500 pl-1">Белки (г)</label>
+            <input type="number" id="manualProteins" placeholder="0" min="0"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+          </div>
+          <div>
+            <label class="text-xs text-gray-500 pl-1">Жиры (г)</label>
+            <input type="number" id="manualFats" placeholder="0" min="0"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+          </div>
+          <div>
+            <label class="text-xs text-gray-500 pl-1">Углеводы (г)</label>
+            <input type="number" id="manualCarbs" placeholder="0" min="0"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button onclick="addEntry()" id="submitBtn"
+        class="w-full mt-3 bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white font-semibold py-2.5 rounded-xl transition-colors text-sm">
+        Добавить
+      </button>
+
+      <div id="statusMsg" class="hidden text-center text-xs mt-2"></div>
+    </div>
+
+    <!-- Log -->
+    <div id="foodLog" class="space-y-2"></div>
+
+  </div>
+
+  <script>
+    const SYSTEM_PROMPT = 'Ты нутрициолог. Когда получаешь описание еды или видишь фото с едой — отвечаешь ТОЛЬКО JSON-объектом без пояснений: {"name":"название блюда кратко","calories":число,"proteins":число,"fats":число,"carbs":число}. Калории в ккал, БЖУ в граммах, все числа округлённые. Оцени реалистичную порцию.';
+
+    let currentTab = 'text';
+    let currentPhotoBase64 = null;
+    let currentPhotoType = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const key = localStorage.getItem('anthropicApiKey');
+      if (key) document.getElementById('apiKey').value = key;
+
+      const today = new Date();
+      document.getElementById('dateDisplay').textContent =
+        today.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+
+      renderLog();
+      updateTotals();
+    });
+
+    function saveApiKey() {
+      localStorage.setItem('anthropicApiKey', document.getElementById('apiKey').value.trim());
+    }
+
+    function toggleSettings() {
+      document.getElementById('settings').classList.toggle('hidden');
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      ['text', 'photo', 'manual'].forEach(t => {
+        document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) {
+          btn.classList.add('bg-white', 'shadow', 'text-rose-600');
+          btn.classList.remove('text-gray-500');
+        } else {
+          btn.classList.remove('bg-white', 'shadow', 'text-rose-600');
+          btn.classList.add('text-gray-500');
+        }
+      });
+      setStatus('');
+    }
+
+    function handlePhotoSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        const [header, data] = dataUrl.split(',');
+        currentPhotoBase64 = data;
+        currentPhotoType = header.match(/:(.*?);/)[1];
+
+        document.getElementById('photoPlaceholder').classList.add('hidden');
+        const preview = document.getElementById('photoPreview');
+        preview.src = dataUrl;
+        preview.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function getToday() {
+      return new Date().toISOString().split('T')[0];
+    }
+
+    function getLog() {
+      const all = JSON.parse(localStorage.getItem('foodLog') || '{}');
+      return all[getToday()] || [];
+    }
+
+    function saveLog(entries) {
+      const all = JSON.parse(localStorage.getItem('foodLog') || '{}');
+      all[getToday()] = entries;
+      localStorage.setItem('foodLog', JSON.stringify(all));
+    }
+
+    function setStatus(msg, isError = false) {
+      const el = document.getElementById('statusMsg');
+      if (!msg) { el.classList.add('hidden'); return; }
+      el.textContent = msg;
+      el.classList.remove('hidden', 'text-red-500', 'text-gray-400');
+      el.classList.add(isError ? 'text-red-500' : 'text-gray-400');
+    }
+
+    function setLoading(on) {
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = on;
+      btn.textContent = on ? 'Анализирую...' : 'Добавить';
+      btn.classList.toggle('opacity-60', on);
+      btn.classList.toggle('cursor-not-allowed', on);
+    }
+
+    function extractJson(text) {
+      const match = text.match(/\{[\s\S]*?\}/);
+      if (!match) throw new Error('Не удалось разобрать ответ');
+      return JSON.parse(match[0]);
+    }
+
+    async function callClaude(messages) {
+      const apiKey = localStorage.getItem('anthropicApiKey');
+      if (!apiKey) throw new Error('Введи API ключ в настройках (шестерёнка сверху)');
+
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 300,
+          system: SYSTEM_PROMPT,
+          messages,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || `Ошибка API: ${res.status}`);
+      }
+
+      const data = await res.json();
+      return data.content[0].text;
+    }
+
+    async function addEntry() {
+      setStatus('');
+      let entry;
+
+      try {
+        if (currentTab === 'text') {
+          const text = document.getElementById('textInput').value.trim();
+          if (!text) { setStatus('Напиши, что съела', true); return; }
+
+          setLoading(true);
+          const raw = await callClaude([{ role: 'user', content: text }]);
+          const result = extractJson(raw);
+          entry = makeEntry(result);
+          document.getElementById('textInput').value = '';
+
+        } else if (currentTab === 'photo') {
+          if (!currentPhotoBase64) { setStatus('Выбери фото', true); return; }
+
+          setLoading(true);
+          const raw = await callClaude([{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: currentPhotoType, data: currentPhotoBase64 } },
+              { type: 'text', text: 'Что на фото и какое КБЖУ?' },
+            ],
+          }]);
+          const result = extractJson(raw);
+          entry = makeEntry(result);
+
+          currentPhotoBase64 = null;
+          currentPhotoType = null;
+          document.getElementById('photoPlaceholder').classList.remove('hidden');
+          document.getElementById('photoPreview').classList.add('hidden');
+          document.getElementById('photoInput').value = '';
+
+        } else {
+          const calories = parseFloat(document.getElementById('manualCalories').value) || 0;
+          const proteins = parseFloat(document.getElementById('manualProteins').value) || 0;
+          const fats     = parseFloat(document.getElementById('manualFats').value)     || 0;
+          const carbs    = parseFloat(document.getElementById('manualCarbs').value)    || 0;
+
+          if (!calories && !proteins && !fats && !carbs) {
+            setStatus('Введи хотя бы одно значение', true);
+            return;
+          }
+
+          const name = document.getElementById('manualName').value.trim() || 'Приём пищи';
+          entry = makeEntry({ name, calories, proteins, fats, carbs });
+          ['manualName', 'manualCalories', 'manualProteins', 'manualFats', 'manualCarbs']
+            .forEach(id => { document.getElementById(id).value = ''; });
+        }
+
+        const log = getLog();
+        log.push(entry);
+        saveLog(log);
+        renderLog();
+        updateTotals();
+        setStatus('Добавлено ✓');
+
+      } catch (err) {
+        setStatus(err.message, true);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function makeEntry({ name, calories, proteins, fats, carbs }) {
+      return {
+        id: Date.now(),
+        name: name || 'Блюдо',
+        calories: Math.round(+calories || 0),
+        proteins: Math.round(+proteins || 0),
+        fats:     Math.round(+fats     || 0),
+        carbs:    Math.round(+carbs    || 0),
+        time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+      };
+    }
+
+    function deleteEntry(id) {
+      const log = getLog().filter(e => e.id !== id);
+      saveLog(log);
+      renderLog();
+      updateTotals();
+    }
+
+    function updateTotals() {
+      const log = getLog();
+      const t = log.reduce(
+        (acc, e) => ({
+          calories: acc.calories + e.calories,
+          proteins: acc.proteins + e.proteins,
+          fats:     acc.fats     + e.fats,
+          carbs:    acc.carbs    + e.carbs,
+        }),
+        { calories: 0, proteins: 0, fats: 0, carbs: 0 }
+      );
+      document.getElementById('totalCalories').textContent = t.calories;
+      document.getElementById('totalProteins').textContent = t.proteins;
+      document.getElementById('totalFats').textContent     = t.fats;
+      document.getElementById('totalCarbs').textContent    = t.carbs;
+    }
+
+    function renderLog() {
+      const log = getLog();
+      const container = document.getElementById('foodLog');
+
+      if (log.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">Пока ничего не добавлено</p>';
+        return;
+      }
+
+      container.innerHTML = log.slice().reverse().map(e => `
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-rose-100">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="font-medium text-gray-800 text-sm">${escHtml(e.name)}</div>
+              <div class="text-xs text-gray-400 mt-0.5">${e.time}</div>
+            </div>
+            <button onclick="deleteEntry(${e.id})"
+              class="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none ml-2 mt-0.5"
+              title="Удалить">&times;</button>
+          </div>
+          <div class="grid grid-cols-4 gap-1.5 mt-3">
+            <div class="bg-orange-50 rounded-lg p-1.5 text-center">
+              <div class="text-sm font-semibold text-orange-400">${e.calories}</div>
+              <div class="text-xs text-gray-400">ккал</div>
+            </div>
+            <div class="bg-blue-50 rounded-lg p-1.5 text-center">
+              <div class="text-sm font-semibold text-blue-500">${e.proteins}г</div>
+              <div class="text-xs text-gray-400">белки</div>
+            </div>
+            <div class="bg-amber-50 rounded-lg p-1.5 text-center">
+              <div class="text-sm font-semibold text-amber-500">${e.fats}г</div>
+              <div class="text-xs text-gray-400">жиры</div>
+            </div>
+            <div class="bg-green-50 rounded-lg p-1.5 text-center">
+              <div class="text-sm font-semibold text-green-500">${e.carbs}г</div>
+              <div class="text-xs text-gray-400">углев.</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+
+</body>
+</html>
