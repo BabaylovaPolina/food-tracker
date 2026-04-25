@@ -231,7 +231,7 @@
       if (user) {
         document.getElementById('authScreen').classList.add('hidden');
         document.getElementById('appScreen').classList.remove('hidden');
-        const key = localStorage.getItem('geminiApiKey');
+        const key = localStorage.getItem('anthropicApiKey');
         if (key) document.getElementById('apiKey') && (document.getElementById('apiKey').value = key);
         initApp();
       } else {
@@ -329,7 +329,7 @@
     }
 
     function saveApiKey() {
-      localStorage.setItem('geminiApiKey', document.getElementById('apiKey').value.trim());
+      localStorage.setItem('anthropicApiKey', document.getElementById('apiKey').value.trim());
     }
 
     async function saveSettingsForm() {
@@ -394,12 +394,12 @@
         </div>
 
         <div class="border-t border-gray-100 pt-3 mb-3">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Gemini API ключ</label>
-          <input type="password" id="apiKey" placeholder="AIza..."
-            value="${localStorage.getItem('geminiApiKey') || ''}"
+          <label class="block text-sm font-medium text-gray-700 mb-1">Anthropic API ключ</label>
+          <input type="password" id="apiKey" placeholder="sk-ant-..."
+            value="${localStorage.getItem('anthropicApiKey') || ''}"
             class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]"
             oninput="saveApiKey()">
-          <p class="text-xs text-gray-400 mt-1">Получить бесплатно: <a href="https://aistudio.google.com/apikey" target="_blank" class="underline">aistudio.google.com/apikey</a> · Хранится только в браузере</p>
+          <p class="text-xs text-gray-400 mt-1">Получить: <a href="https://console.anthropic.com/settings/keys" target="_blank" class="underline">console.anthropic.com</a> → API Keys · Хранится только в браузере</p>
         </div>
 
         <div class="flex items-center gap-3">
@@ -576,7 +576,7 @@
       reader.readAsDataURL(file);
     }
 
-    // ── Claude API ────────────────────────────────────────────────────────────
+    // ── Anthropic API ─────────────────────────────────────────────────────────
 
     function extractJson(text) {
       const m = text.match(/\{[\s\S]*?\}/);
@@ -584,23 +584,31 @@
       return JSON.parse(m[0]);
     }
 
-    async function callGemini(parts) {
-      const apiKey = localStorage.getItem('geminiApiKey');
-      if (!apiKey) throw new Error('Введи Gemini API ключ в настройках (шестерёнка сверху)');
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            systemInstruction: { parts: [{ text: buildSystemPrompt() }] },
-            contents: [{ parts }],
-            generationConfig: { maxOutputTokens: 300 },
-          }),
-        }
+    async function callAI(parts) {
+      const apiKey = localStorage.getItem('anthropicApiKey');
+      if (!apiKey) throw new Error('Введи Anthropic API ключ в настройках (шестерёнка сверху)');
+      const content = parts.map(p =>
+        p.inline_data
+          ? { type: 'image', source: { type: 'base64', media_type: p.inline_data.mime_type, data: p.inline_data.data } }
+          : { type: 'text', text: p.text }
       );
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-allow-browser': 'true',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 300,
+          system: buildSystemPrompt(),
+          messages: [{ role: 'user', content }],
+        }),
+      });
       if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error?.message || `Ошибка API: ${res.status}`); }
-      return (await res.json()).candidates[0].content.parts[0].text;
+      return (await res.json()).content[0].text;
     }
 
     // ── Add entry ─────────────────────────────────────────────────────────────
@@ -612,7 +620,7 @@
           const text = document.getElementById('textInput').value.trim();
           if (!text) { setStatus('Напиши, что съела', true); return; }
           setLoading(true);
-          const parsed = extractJson(await callGemini([{ text }]));
+          const parsed = extractJson(await callAI([{ text }]));
           parsed.name = document.getElementById('mealName').value.trim() || parsed.name;
           entry = makeEntry(parsed);
           document.getElementById('textInput').value = '';
@@ -621,7 +629,7 @@
         } else if (currentTab === 'photo') {
           if (!currentPhotoBase64) { setStatus('Выбери фото', true); return; }
           setLoading(true);
-          const parsedPhoto = extractJson(await callGemini([
+          const parsedPhoto = extractJson(await callAI([
             { inline_data: { mime_type: currentPhotoType, data: currentPhotoBase64 } },
             { text: 'Определи КБЖУ для еды на фото.' },
           ]));
