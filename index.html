@@ -593,8 +593,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            systemInstruction: { parts: [{ text: buildSystemPrompt() }] },
-            contents: [{ parts }],
+            contents: [{ parts: [{ text: buildSystemPrompt() }, ...parts] }],
             generationConfig: { maxOutputTokens: 300 },
           }),
         }
