@@ -51,7 +51,7 @@
   </div>
 
   <!-- App screen -->
-  <div id="appScreen" class="hidden max-w-lg mx-auto p-4 pb-12">
+  <div id="appScreen" class="hidden max-w-6xl mx-auto p-4 pb-12">
 
     <div class="flex items-center justify-between mb-5">
       <h1 class="text-2xl font-display font-semibold text-[#2C3A2D]">Дневник питания</h1>
@@ -63,81 +63,93 @@
       <div id="settingsContent"></div>
     </div>
 
-    <!-- Summary (rendered by JS) -->
-    <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
-      <div class="flex items-center justify-between mb-4">
-        <button onclick="changeDay(-1)" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">&#8592;</button>
-        <div class="flex items-center gap-1.5">
-          <div class="text-xs text-gray-500 font-medium" id="dateDisplay"></div>
-          <div class="relative">
-            <button onclick="openCalendar()" class="text-gray-400 hover:text-[#B8975A] transition-colors text-base leading-none" title="Выбрать дату">&#128197;</button>
-            <input type="date" id="datePicker" onchange="jumpToDate(this.value)"
-              class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+    <!-- Two-column layout on desktop -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-8 lg:items-start">
+
+      <!-- Left column: today -->
+      <div class="min-w-0">
+
+        <!-- Summary (rendered by JS) -->
+        <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
+          <div class="flex items-center justify-between mb-4">
+            <button onclick="changeDay(-1)" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">&#8592;</button>
+            <div class="flex items-center gap-1.5">
+              <div class="text-xs text-gray-500 font-medium" id="dateDisplay"></div>
+              <div class="relative">
+                <button onclick="openCalendar()" class="text-gray-400 hover:text-[#B8975A] transition-colors text-base leading-none" title="Выбрать дату">&#128197;</button>
+                <input type="date" id="datePicker" onchange="jumpToDate(this.value)"
+                  class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+              </div>
+            </div>
+            <button onclick="changeDay(1)" id="btnNextDay" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-25 disabled:cursor-default">&#8594;</button>
           </div>
+          <div id="summaryContent"></div>
         </div>
-        <button onclick="changeDay(1)" id="btnNextDay" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-25 disabled:cursor-default">&#8594;</button>
-      </div>
-      <div id="summaryContent"></div>
-    </div>
 
-    <!-- Charts section -->
-    <div id="chartsSection" class="mb-4">
-      <button onclick="toggleCharts()"
-        class="w-full bg-white rounded-2xl px-4 py-3 shadow-sm border border-[#E5DDD2] text-sm text-gray-500 hover:text-[#3A5235] transition-colors flex items-center justify-between">
-        <span>Графики за период</span>
-        <span id="chartsArrow" class="transition-transform">&#9662;</span>
-      </button>
-      <div id="chartsContent" class="hidden mt-2"></div>
-    </div>
+        <!-- Input card -->
+        <div id="inputCard" class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
+          <!-- Meal name + suggestions -->
+          <div class="mb-3">
+            <div class="flex gap-1.5 flex-wrap mb-2">
+              <button onclick="setMealName('Завтрак')" id="suggest-Завтрак" class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Завтрак</button>
+              <button onclick="setMealName('Обед')"    id="suggest-Обед"    class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Обед</button>
+              <button onclick="setMealName('Ужин')"    id="suggest-Ужин"    class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Ужин</button>
+              <button onclick="setMealName('Перекус')" id="suggest-Перекус" class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Перекус</button>
+            </div>
+            <input type="text" id="mealName" placeholder="Или введи своё название"
+              oninput="updateSuggestionButtons()"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]">
+          </div>
 
-    <!-- Input card -->
-    <div id="inputCard" class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
-      <!-- Meal name + suggestions -->
-      <div class="mb-3">
-        <div class="flex gap-1.5 flex-wrap mb-2">
-          <button onclick="setMealName('Завтрак')" id="suggest-Завтрак" class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Завтрак</button>
-          <button onclick="setMealName('Обед')"    id="suggest-Обед"    class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Обед</button>
-          <button onclick="setMealName('Ужин')"    id="suggest-Ужин"    class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Ужин</button>
-          <button onclick="setMealName('Перекус')" id="suggest-Перекус" class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Перекус</button>
+          <div class="flex gap-1 mb-4 bg-gray-100 rounded-xl p-1">
+            <button onclick="switchTab('text')"   id="tab-text"   class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-[#3A5235]">Текст</button>
+            <button onclick="switchTab('photo')"  id="tab-photo"  class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Фото</button>
+            <button onclick="switchTab('manual')" id="tab-manual" class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Вручную</button>
+          </div>
+
+          <div id="panel-text">
+            <textarea id="textInput" rows="3"
+              placeholder="Например: 200г куриной грудки и 150г гречки&#10;Enter — добавить, Shift+Enter — новая строка"
+              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A] resize-none"></textarea>
+          </div>
+
+          <div id="panel-photo" class="hidden">
+            <div id="photoDropZone" onclick="document.getElementById('photoInput').click()"
+              class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-[#C4B5A0] transition-colors">
+              <div id="photoPlaceholder"><div class="text-4xl mb-2">&#128247;</div><div class="text-sm text-gray-400">Нажмите, чтобы выбрать фото</div></div>
+              <img id="photoPreview" class="hidden max-h-52 mx-auto rounded-lg object-contain">
+            </div>
+            <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)">
+          </div>
+
+          <div id="panel-manual" class="hidden">
+            <div id="manualFields" class="grid grid-cols-2 gap-2"></div>
+          </div>
+
+          <button onclick="addEntry()" id="submitBtn"
+            class="w-full mt-3 bg-[#2C3A2D] hover:bg-[#1E2B1F] active:bg-[#141E15] text-white font-semibold py-2.5 rounded-xl transition-colors text-sm">
+            Добавить
+          </button>
+          <div id="statusMsg" class="hidden text-center text-xs mt-2"></div>
         </div>
-        <input type="text" id="mealName" placeholder="Или введи своё название"
-          oninput="updateSuggestionButtons()"
-          class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]">
+
+        <div id="foodLog" class="space-y-2 transition-opacity"></div>
       </div>
 
-      <div class="flex gap-1 mb-4 bg-gray-100 rounded-xl p-1">
-        <button onclick="switchTab('text')"   id="tab-text"   class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-[#3A5235]">Текст</button>
-        <button onclick="switchTab('photo')"  id="tab-photo"  class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Фото</button>
-        <button onclick="switchTab('manual')" id="tab-manual" class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Вручную</button>
-      </div>
-
-      <div id="panel-text">
-        <textarea id="textInput" rows="3"
-          placeholder="Например: 200г куриной грудки и 150г гречки&#10;Enter — добавить, Shift+Enter — новая строка"
-          class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A] resize-none"></textarea>
-      </div>
-
-      <div id="panel-photo" class="hidden">
-        <div id="photoDropZone" onclick="document.getElementById('photoInput').click()"
-          class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-[#C4B5A0] transition-colors">
-          <div id="photoPlaceholder"><div class="text-4xl mb-2">&#128247;</div><div class="text-sm text-gray-400">Нажмите, чтобы выбрать фото</div></div>
-          <img id="photoPreview" class="hidden max-h-52 mx-auto rounded-lg object-contain">
+      <!-- Right column: charts (sticky on desktop) -->
+      <div class="lg:sticky lg:top-4 mt-4 lg:mt-0">
+        <div class="hidden lg:flex items-center mb-3 px-1">
+          <span class="font-display text-lg font-semibold text-[#2C3A2D]">Сводка за период</span>
         </div>
-        <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)">
+        <button onclick="toggleCharts()"
+          class="lg:hidden w-full bg-white rounded-2xl px-4 py-3 shadow-sm border border-[#E5DDD2] text-sm text-gray-500 hover:text-[#3A5235] transition-colors flex items-center justify-between mb-2">
+          <span>Графики за период</span>
+          <span id="chartsArrow" class="transition-transform">&#9662;</span>
+        </button>
+        <div id="chartsContent" class="hidden lg:block"></div>
       </div>
 
-      <div id="panel-manual" class="hidden">
-        <div id="manualFields" class="grid grid-cols-2 gap-2"></div>
-      </div>
-
-      <button onclick="addEntry()" id="submitBtn"
-        class="w-full mt-3 bg-[#2C3A2D] hover:bg-[#1E2B1F] active:bg-[#141E15] text-white font-semibold py-2.5 rounded-xl transition-colors text-sm">
-        Добавить
-      </button>
-      <div id="statusMsg" class="hidden text-center text-xs mt-2"></div>
     </div>
-
-    <div id="foodLog" class="space-y-2 transition-opacity"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -267,6 +279,7 @@
       document.getElementById('textInput').addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addEntry(); }
       });
+      if (window.innerWidth >= 1024) renderCharts();
     }
 
     // ── Profile ───────────────────────────────────────────────────────────────
@@ -817,8 +830,8 @@
       const content = document.getElementById('chartsContent');
       const arrow   = document.getElementById('chartsArrow');
       content.classList.toggle('hidden', !chartsVisible);
-      arrow.style.transform = chartsVisible ? 'rotate(180deg)' : '';
-      if (chartsVisible) renderCharts();
+      if (arrow) arrow.style.transform = chartsVisible ? 'rotate(180deg)' : '';
+      if (chartsVisible && chartInstances.length === 0) renderCharts();
     }
 
     function setPeriod(days) {
