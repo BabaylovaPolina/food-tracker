@@ -77,6 +77,19 @@
 
     <!-- Input card -->
     <div id="inputCard" class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
+      <!-- Meal name + suggestions -->
+      <div class="mb-3">
+        <div class="flex gap-1.5 flex-wrap mb-2">
+          <button onclick="setMealName('Завтрак')" id="suggest-Завтрак" class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-rose-50 text-rose-600 hover:bg-rose-100">Завтрак</button>
+          <button onclick="setMealName('Обед')"    id="suggest-Обед"    class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-rose-50 text-rose-600 hover:bg-rose-100">Обед</button>
+          <button onclick="setMealName('Ужин')"    id="suggest-Ужин"    class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-rose-50 text-rose-600 hover:bg-rose-100">Ужин</button>
+          <button onclick="setMealName('Перекус')" id="suggest-Перекус" class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-rose-50 text-rose-600 hover:bg-rose-100">Перекус</button>
+        </div>
+        <input type="text" id="mealName" placeholder="Или введи своё название"
+          oninput="updateSuggestionButtons()"
+          class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+      </div>
+
       <div class="flex gap-1 mb-4 bg-gray-100 rounded-xl p-1">
         <button onclick="switchTab('text')"   id="tab-text"   class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-rose-600">Текст</button>
         <button onclick="switchTab('photo')"  id="tab-photo"  class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Фото</button>
@@ -99,8 +112,6 @@
       </div>
 
       <div id="panel-manual" class="hidden">
-        <input type="text" id="manualName" placeholder="Название (необязательно)"
-          class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-rose-300">
         <div id="manualFields" class="grid grid-cols-2 gap-2"></div>
       </div>
 
@@ -232,6 +243,7 @@
       renderSettingsPanel();
       updateDateDisplay();
       renderManualFields();
+      resetMealName();
       loadDay();
       document.getElementById('textInput').addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addEntry(); }
@@ -408,6 +420,41 @@
       return _fmt(d.getFullYear(), d.getMonth() + 1, d.getDate());
     }
 
+    const SUGGESTIONS = ['Завтрак', 'Обед', 'Ужин', 'Перекус'];
+
+    function getDefaultMealName() {
+      const h = new Date().getHours();
+      if (h >= 6  && h < 11) return 'Завтрак';
+      if (h >= 11 && h < 15) return 'Обед';
+      if (h >= 15 && h < 18) return 'Перекус';
+      if (h >= 18 && h < 23) return 'Ужин';
+      return '';
+    }
+
+    function setMealName(name) {
+      const inp = document.getElementById('mealName');
+      inp.value = inp.value === name ? '' : name;
+      updateSuggestionButtons();
+    }
+
+    function updateSuggestionButtons() {
+      const val = document.getElementById('mealName').value;
+      SUGGESTIONS.forEach(s => {
+        const btn = document.getElementById(`suggest-${s}`);
+        if (!btn) return;
+        const active = val === s;
+        btn.classList.toggle('bg-rose-500', active);
+        btn.classList.toggle('text-white',  active);
+        btn.classList.toggle('bg-rose-50',  !active);
+        btn.classList.toggle('text-rose-600', !active);
+      });
+    }
+
+    function resetMealName() {
+      document.getElementById('mealName').value = getDefaultMealName();
+      updateSuggestionButtons();
+    }
+
     function jumpToDate(dateStr) {
       if (!dateStr || dateStr > getToday()) return;
       viewDate = dateStr; editingId = null;
@@ -503,23 +550,27 @@
           const text = document.getElementById('textInput').value.trim();
           if (!text) { setStatus('Напиши, что съела', true); return; }
           setLoading(true);
-          entry = makeEntry(extractJson(await callClaude([{ role:'user', content:text }])));
+          const parsed = extractJson(await callClaude([{ role:'user', content:text }]));
+          parsed.name = document.getElementById('mealName').value.trim() || parsed.name;
+          entry = makeEntry(parsed);
           document.getElementById('textInput').value = '';
 
         } else if (currentTab === 'photo') {
           if (!currentPhotoBase64) { setStatus('Выбери фото', true); return; }
           setLoading(true);
-          entry = makeEntry(extractJson(await callClaude([{ role:'user', content:[
+          const parsedPhoto = extractJson(await callClaude([{ role:'user', content:[
             { type:'image', source:{ type:'base64', media_type:currentPhotoType, data:currentPhotoBase64 } },
             { type:'text',  text:'Определи КБЖУ для еды на фото.' },
-          ]}])));
+          ]}]));
+          parsedPhoto.name = document.getElementById('mealName').value.trim() || parsedPhoto.name;
+          entry = makeEntry(parsedPhoto);
           currentPhotoBase64 = null; currentPhotoType = null;
           document.getElementById('photoPlaceholder').classList.remove('hidden');
           document.getElementById('photoPreview').classList.add('hidden');
           document.getElementById('photoInput').value = '';
 
         } else {
-          const name = document.getElementById('manualName').value.trim() || 'Приём пищи';
+          const name = document.getElementById('mealName').value.trim() || 'Приём пищи';
           const vals = {};
           let hasAny = false;
           getTrackedMacros().forEach(m => {
@@ -531,7 +582,6 @@
           });
           if (!hasAny && unknownInForm.size === 0) { setStatus('Введи хотя бы одно значение', true); return; }
           entry = makeEntry({ name, ...vals });
-          document.getElementById('manualName').value = '';
           getTrackedMacros().forEach(m => {
             const inp = document.getElementById(`form-${m.key}`);
             if (inp) inp.value = '';
@@ -542,6 +592,7 @@
 
         dayEntries.push(entry);
         await saveDay(); renderLog(); updateTotals();
+        resetMealName();
         setStatus('Добавлено ✓');
       } catch (err) { setStatus(err.message, true); }
       finally { setLoading(false); }
