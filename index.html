@@ -27,7 +27,11 @@
 
     <!-- Daily summary -->
     <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
-      <div class="text-xs text-gray-400 mb-3">Сегодня, <span id="dateDisplay"></span></div>
+      <div class="flex items-center justify-between mb-3">
+        <button onclick="changeDay(-1)" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">&#8592;</button>
+        <div class="text-xs text-gray-500 font-medium" id="dateDisplay"></div>
+        <button onclick="changeDay(1)" id="btnNextDay" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-25 disabled:cursor-default">&#8594;</button>
+      </div>
       <div class="grid grid-cols-4 gap-2 text-center">
         <div>
           <div class="text-2xl font-bold text-orange-400" id="totalCalories">0</div>
@@ -49,7 +53,7 @@
     </div>
 
     <!-- Input card -->
-    <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
+    <div id="inputCard" class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
 
       <!-- Tabs -->
       <div class="flex gap-1 mb-4 bg-gray-100 rounded-xl p-1">
@@ -70,7 +74,7 @@
       <!-- Text panel -->
       <div id="panel-text">
         <textarea id="textInput" rows="3"
-          placeholder="Например: 200г куриной грудки на гриле и 150г гречки"
+          placeholder="Например: 200г куриной грудки на гриле и 150г гречки&#10;Enter — добавить, Shift+Enter — новая строка"
           class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none"></textarea>
       </div>
 
@@ -135,17 +139,24 @@
     let currentTab = 'text';
     let currentPhotoBase64 = null;
     let currentPhotoType = null;
+    let viewDate = getToday();
 
     document.addEventListener('DOMContentLoaded', () => {
       const key = localStorage.getItem('anthropicApiKey');
       if (key) document.getElementById('apiKey').value = key;
 
-      const today = new Date();
-      document.getElementById('dateDisplay').textContent =
-        today.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
-
+      updateDateDisplay();
       renderLog();
       updateTotals();
+
+      document.getElementById('textInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addEntry(); }
+      });
+      ['manualName', 'manualCalories', 'manualProteins', 'manualFats', 'manualCarbs'].forEach(id => {
+        document.getElementById(id).addEventListener('keydown', e => {
+          if (e.key === 'Enter') addEntry();
+        });
+      });
     });
 
     function saveApiKey() {
@@ -195,14 +206,40 @@
       return new Date().toISOString().split('T')[0];
     }
 
+    function changeDay(delta) {
+      const d = new Date(viewDate + 'T00:00:00');
+      d.setDate(d.getDate() + delta);
+      const next = d.toISOString().split('T')[0];
+      if (next > getToday()) return;
+      viewDate = next;
+      updateDateDisplay();
+      renderLog();
+      updateTotals();
+    }
+
+    function updateDateDisplay() {
+      const today = getToday();
+      const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+      const yStr = yesterday.toISOString().split('T')[0];
+      const d = new Date(viewDate + 'T00:00:00');
+      const dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+      let label;
+      if (viewDate === today)   label = 'Сегодня, ' + dateStr;
+      else if (viewDate === yStr) label = 'Вчера, ' + dateStr;
+      else label = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+      document.getElementById('dateDisplay').textContent = label;
+      document.getElementById('btnNextDay').disabled = viewDate >= today;
+      document.getElementById('inputCard').classList.toggle('hidden', viewDate !== today);
+    }
+
     function getLog() {
       const all = JSON.parse(localStorage.getItem('foodLog') || '{}');
-      return all[getToday()] || [];
+      return all[viewDate] || [];
     }
 
     function saveLog(entries) {
       const all = JSON.parse(localStorage.getItem('foodLog') || '{}');
-      all[getToday()] = entries;
+      all[viewDate] = entries;
       localStorage.setItem('foodLog', JSON.stringify(all));
     }
 
