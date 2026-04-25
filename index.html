@@ -14,7 +14,6 @@
       <h1 class="text-2xl font-bold text-rose-700">Дневник питания</h1>
       <p class="text-sm text-gray-400 mt-1">Войди, чтобы данные синхронизировались</p>
     </div>
-
     <button onclick="signInGoogle()"
       class="w-full flex items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm mb-4 transition-colors">
       <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -25,13 +24,11 @@
       </svg>
       Войти через Google
     </button>
-
     <div class="flex items-center gap-3 mb-4">
       <div class="flex-1 h-px bg-gray-200"></div>
       <span class="text-xs text-gray-400">или</span>
       <div class="flex-1 h-px bg-gray-200"></div>
     </div>
-
     <div class="space-y-2 mb-3">
       <input type="email" id="authEmail" placeholder="Email"
         class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
@@ -39,7 +36,6 @@
         class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
         onkeydown="if(event.key==='Enter') signInEmail()">
     </div>
-
     <div class="flex gap-2">
       <button onclick="signInEmail()"
         class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
@@ -50,7 +46,6 @@
         Регистрация
       </button>
     </div>
-
     <div id="authError" class="hidden text-red-500 text-xs text-center mt-3"></div>
   </div>
 
@@ -60,71 +55,93 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-5">
       <h1 class="text-xl font-bold text-rose-700">Дневник питания</h1>
-      <button onclick="toggleSettings()" class="text-gray-400 hover:text-gray-600 text-xl px-1" title="Настройки">&#9881;</button>
+      <button onclick="toggleSettings()" class="text-gray-400 hover:text-gray-600 text-xl px-1">&#9881;</button>
     </div>
 
     <!-- Settings panel -->
-    <div id="settings" class="hidden bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
-      <div class="flex items-center justify-between mb-3">
+    <div id="settings" class="hidden bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100 space-y-4">
+      <div class="flex items-center justify-between">
         <div class="text-sm text-gray-600 truncate pr-2">Вы вошли как <span id="userLabel" class="font-medium"></span></div>
         <button onclick="signOut()" class="text-xs text-rose-500 hover:text-rose-700 shrink-0">Выйти</button>
+      </div>
+      <div class="border-t border-gray-100 pt-3">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Вес (кг)</label>
+        <div class="flex gap-2">
+          <input type="number" id="weightInput" placeholder="60" min="30" max="200"
+            class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+          <button onclick="saveWeight()"
+            class="bg-rose-500 hover:bg-rose-600 text-white text-sm font-medium px-4 rounded-xl transition-colors">
+            Сохранить
+          </button>
+        </div>
+        <p id="normsHint" class="text-xs text-gray-400 mt-1 hidden"></p>
       </div>
       <div class="border-t border-gray-100 pt-3">
         <label class="block text-sm font-medium text-gray-700 mb-1">Anthropic API ключ</label>
         <input type="password" id="apiKey" placeholder="sk-ant-..."
           class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
           oninput="saveApiKey()">
-        <p class="text-xs text-gray-400 mt-1">Хранится только в вашем браузере</p>
+        <p class="text-xs text-gray-400 mt-1">Хранится только в браузере</p>
       </div>
     </div>
 
     <!-- Daily summary -->
     <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
-      <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center justify-between mb-4">
         <button onclick="changeDay(-1)" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">&#8592;</button>
         <div class="text-xs text-gray-500 font-medium" id="dateDisplay"></div>
         <button onclick="changeDay(1)" id="btnNextDay" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-25 disabled:cursor-default">&#8594;</button>
       </div>
-      <div class="grid grid-cols-4 gap-2 text-center">
+
+      <!-- Progress bars -->
+      <div class="space-y-3" id="progressBars">
         <div>
-          <div class="text-2xl font-bold text-orange-400" id="totalCalories">0</div>
-          <div class="text-xs text-gray-400">ккал</div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-blue-600 font-medium">Белки</span>
+            <span class="text-gray-500"><span id="totalProteins">0</span>г / <span id="goalProteins">—</span>г</span>
+          </div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div id="barProteins" class="h-full bg-blue-400 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
         </div>
         <div>
-          <div class="text-2xl font-bold text-blue-500" id="totalProteins">0</div>
-          <div class="text-xs text-gray-400">белки г</div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-amber-600 font-medium">Жиры</span>
+            <span class="text-gray-500"><span id="totalFats">0</span>г / <span id="goalFats">—</span>г</span>
+          </div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div id="barFats" class="h-full bg-amber-400 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
         </div>
         <div>
-          <div class="text-2xl font-bold text-amber-500" id="totalFats">0</div>
-          <div class="text-xs text-gray-400">жиры г</div>
-        </div>
-        <div>
-          <div class="text-2xl font-bold text-green-500" id="totalCarbs">0</div>
-          <div class="text-xs text-gray-400">углев. г</div>
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-green-600 font-medium">Клетчатка</span>
+            <span class="text-gray-500"><span id="totalFiber">0</span>г / <span id="goalFiber">25</span>г</span>
+          </div>
+          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div id="barFiber" class="h-full bg-green-400 rounded-full transition-all duration-500" style="width:0%"></div>
+          </div>
         </div>
       </div>
+
+      <!-- Assessment -->
+      <div id="assessment" class="hidden mt-4 pt-3 border-t border-gray-100 text-sm text-center text-gray-600"></div>
     </div>
 
     <!-- Input card -->
     <div id="inputCard" class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
       <div class="flex gap-1 mb-4 bg-gray-100 rounded-xl p-1">
         <button onclick="switchTab('text')" id="tab-text"
-          class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-rose-600">
-          Текст
-        </button>
+          class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-rose-600">Текст</button>
         <button onclick="switchTab('photo')" id="tab-photo"
-          class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">
-          Фото
-        </button>
+          class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Фото</button>
         <button onclick="switchTab('manual')" id="tab-manual"
-          class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">
-          Вручную
-        </button>
+          class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Вручную</button>
       </div>
 
       <div id="panel-text">
         <textarea id="textInput" rows="3"
-          placeholder="Например: 200г куриной грудки на гриле и 150г гречки&#10;Enter — добавить, Shift+Enter — новая строка"
+          placeholder="Например: 200г куриной грудки и 150г гречки&#10;Enter — добавить, Shift+Enter — новая строка"
           class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none"></textarea>
       </div>
 
@@ -143,12 +160,7 @@
       <div id="panel-manual" class="hidden">
         <input type="text" id="manualName" placeholder="Название (необязательно)"
           class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-rose-300">
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="text-xs text-gray-500 pl-1">Калории (ккал)</label>
-            <input type="number" id="manualCalories" placeholder="0" min="0"
-              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
-          </div>
+        <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="text-xs text-gray-500 pl-1">Белки (г)</label>
             <input type="number" id="manualProteins" placeholder="0" min="0"
@@ -160,8 +172,8 @@
               class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
           </div>
           <div>
-            <label class="text-xs text-gray-500 pl-1">Углеводы (г)</label>
-            <input type="number" id="manualCarbs" placeholder="0" min="0"
+            <label class="text-xs text-gray-500 pl-1">Клетчатка (г)</label>
+            <input type="number" id="manualFiber" placeholder="0" min="0"
               class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
           </div>
         </div>
@@ -179,13 +191,11 @@
 
   </div>
 
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
   <script>
-    // ← ВСТАВЬ СЮДА СВОЙ FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyBrPqRg93W-lk4yOAURvJgzlvWuN69RiH4",
       authDomain: "food-tracker-776d1.firebaseapp.com",
@@ -197,18 +207,30 @@
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.firestore();
+    const db   = firebase.firestore();
 
-    const SYSTEM_PROMPT = 'Ты нутрициолог. Когда получаешь описание еды или видишь фото с едой — отвечаешь ТОЛЬКО JSON-объектом без пояснений: {"name":"название блюда кратко","calories":число,"proteins":число,"fats":число,"carbs":число}. Калории в ккал, БЖУ в граммах, все числа округлённые. Оцени реалистичную порцию.';
+    const SYSTEM_PROMPT = 'Ты нутрициолог. Отвечаешь ТОЛЬКО JSON без пояснений: {"name":"название кратко","proteins":число,"fats":число,"fiber":число}. Белки, жиры, клетчатка в граммах, числа округлённые. Оцени реалистичную порцию.';
 
     let currentTab = 'text';
     let currentPhotoBase64 = null;
-    let currentPhotoType = null;
-    let viewDate = getToday();
-    let dayEntries = [];
+    let currentPhotoType   = null;
+    let viewDate    = getToday();
+    let dayEntries  = [];
     let currentUser = null;
+    let userWeight  = null;
 
-    // ── Auth ─────────────────────────────────────────────────────────────────
+    // ── Norms ─────────────────────────────────────────────────────────────────
+
+    function getNorms() {
+      if (!userWeight) return null;
+      return {
+        proteins: Math.round(userWeight * 1.6),
+        fats:     Math.round(userWeight * 1.0),
+        fiber:    25,
+      };
+    }
+
+    // ── Auth ──────────────────────────────────────────────────────────────────
 
     auth.onAuthStateChanged(user => {
       currentUser = user;
@@ -238,10 +260,8 @@
       const email = document.getElementById('authEmail').value.trim();
       const pass  = document.getElementById('authPassword').value;
       if (!email || !pass) { showAuthError('Введи email и пароль'); return; }
-      try {
-        clearAuthError();
-        await auth.signInWithEmailAndPassword(email, pass);
-      } catch (e) { showAuthError(friendlyAuthError(e.code)); }
+      try { clearAuthError(); await auth.signInWithEmailAndPassword(email, pass); }
+      catch (e) { showAuthError(friendlyAuthError(e.code)); }
     }
 
     async function registerEmail() {
@@ -249,10 +269,8 @@
       const pass  = document.getElementById('authPassword').value;
       if (!email || !pass) { showAuthError('Введи email и пароль'); return; }
       if (pass.length < 6) { showAuthError('Пароль минимум 6 символов'); return; }
-      try {
-        clearAuthError();
-        await auth.createUserWithEmailAndPassword(email, pass);
-      } catch (e) { showAuthError(friendlyAuthError(e.code)); }
+      try { clearAuthError(); await auth.createUserWithEmailAndPassword(email, pass); }
+      catch (e) { showAuthError(friendlyAuthError(e.code)); }
     }
 
     function signOut() {
@@ -263,13 +281,9 @@
     function showAuthError(msg) {
       if (!msg) return;
       const el = document.getElementById('authError');
-      el.textContent = msg;
-      el.classList.remove('hidden');
+      el.textContent = msg; el.classList.remove('hidden');
     }
-
-    function clearAuthError() {
-      document.getElementById('authError').classList.add('hidden');
-    }
+    function clearAuthError() { document.getElementById('authError').classList.add('hidden'); }
 
     function friendlyAuthError(code) {
       return ({
@@ -283,9 +297,10 @@
       })[code] || 'Ошибка входа';
     }
 
-    // ── App init ──────────────────────────────────────────────────────────────
+    // ── Init ──────────────────────────────────────────────────────────────────
 
-    function initApp() {
+    async function initApp() {
+      await loadProfile();
       viewDate = getToday();
       updateDateDisplay();
       loadDay();
@@ -293,11 +308,45 @@
       document.getElementById('textInput').addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addEntry(); }
       });
-      ['manualName', 'manualCalories', 'manualProteins', 'manualFats', 'manualCarbs'].forEach(id => {
+      ['manualName', 'manualProteins', 'manualFats', 'manualFiber'].forEach(id => {
         document.getElementById(id).addEventListener('keydown', e => {
           if (e.key === 'Enter') addEntry();
         });
       });
+    }
+
+    // ── Profile (weight) ──────────────────────────────────────────────────────
+
+    function profileRef() {
+      return db.collection('users').doc(currentUser.uid).collection('profile').doc('data');
+    }
+
+    async function loadProfile() {
+      try {
+        const doc = await profileRef().get();
+        if (doc.exists && doc.data().weight) {
+          userWeight = doc.data().weight;
+          document.getElementById('weightInput').value = userWeight;
+          updateNormsHint();
+        }
+      } catch (_) {}
+    }
+
+    async function saveWeight() {
+      const val = parseFloat(document.getElementById('weightInput').value);
+      if (!val || val < 30 || val > 300) { return; }
+      userWeight = val;
+      await profileRef().set({ weight: val }, { merge: true });
+      updateNormsHint();
+      updateTotals();
+    }
+
+    function updateNormsHint() {
+      const norms = getNorms();
+      const el = document.getElementById('normsHint');
+      if (!norms) { el.classList.add('hidden'); return; }
+      el.textContent = `Норма: белки ${norms.proteins}г, жиры ${norms.fats}г, клетчатка ${norms.fiber}г`;
+      el.classList.remove('hidden');
     }
 
     // ── Firestore ─────────────────────────────────────────────────────────────
@@ -311,9 +360,7 @@
       try {
         const doc = await logRef(viewDate).get();
         dayEntries = doc.exists ? (doc.data().entries || []) : [];
-      } catch (_) {
-        dayEntries = [];
-      }
+      } catch (_) { dayEntries = []; }
       renderLog();
       updateTotals();
       setDayLoading(false);
@@ -345,14 +392,13 @@
 
     function updateDateDisplay() {
       const today = getToday();
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
       const yStr = yesterday.toISOString().split('T')[0];
       const d = new Date(viewDate + 'T00:00:00');
       const dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
       let label;
-      if (viewDate === today)      label = 'Сегодня, ' + dateStr;
-      else if (viewDate === yStr)  label = 'Вчера, ' + dateStr;
+      if (viewDate === today)     label = 'Сегодня, ' + dateStr;
+      else if (viewDate === yStr) label = 'Вчера, ' + dateStr;
       else label = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
       document.getElementById('dateDisplay').textContent = label;
       document.getElementById('btnNextDay').disabled = viewDate >= today;
@@ -364,7 +410,6 @@
     function saveApiKey() {
       localStorage.setItem('anthropicApiKey', document.getElementById('apiKey').value.trim());
     }
-
     function toggleSettings() {
       document.getElementById('settings').classList.toggle('hidden');
     }
@@ -376,13 +421,8 @@
       ['text', 'photo', 'manual'].forEach(t => {
         document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
         const btn = document.getElementById(`tab-${t}`);
-        if (t === tab) {
-          btn.classList.add('bg-white', 'shadow', 'text-rose-600');
-          btn.classList.remove('text-gray-500');
-        } else {
-          btn.classList.remove('bg-white', 'shadow', 'text-rose-600');
-          btn.classList.add('text-gray-500');
-        }
+        if (t === tab) { btn.classList.add('bg-white', 'shadow', 'text-rose-600'); btn.classList.remove('text-gray-500'); }
+        else           { btn.classList.remove('bg-white', 'shadow', 'text-rose-600'); btn.classList.add('text-gray-500'); }
       });
       setStatus('');
     }
@@ -400,8 +440,7 @@
         currentPhotoType = header.match(/:(.*?);/)[1];
         document.getElementById('photoPlaceholder').classList.add('hidden');
         const preview = document.getElementById('photoPreview');
-        preview.src = dataUrl;
-        preview.classList.remove('hidden');
+        preview.src = dataUrl; preview.classList.remove('hidden');
       };
       reader.readAsDataURL(file);
     }
@@ -443,19 +482,13 @@
           'anthropic-version': '2023-06-01',
           'anthropic-dangerous-direct-browser-access': 'true',
         },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 300,
-          system: SYSTEM_PROMPT,
-          messages,
-        }),
+        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 300, system: SYSTEM_PROMPT, messages }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err.error?.message || `Ошибка API: ${res.status}`);
       }
-      const data = await res.json();
-      return data.content[0].text;
+      return (await res.json()).content[0].text;
     }
 
     // ── Add / delete entry ────────────────────────────────────────────────────
@@ -478,7 +511,7 @@
             role: 'user',
             content: [
               { type: 'image', source: { type: 'base64', media_type: currentPhotoType, data: currentPhotoBase64 } },
-              { type: 'text', text: 'Что на фото и какое КБЖУ?' },
+              { type: 'text', text: 'Что на фото и какое КБЖУ (белки, жиры, клетчатка)?' },
             ],
           }])));
           currentPhotoBase64 = null; currentPhotoType = null;
@@ -487,16 +520,15 @@
           document.getElementById('photoInput').value = '';
 
         } else {
-          const calories = parseFloat(document.getElementById('manualCalories').value) || 0;
           const proteins = parseFloat(document.getElementById('manualProteins').value) || 0;
           const fats     = parseFloat(document.getElementById('manualFats').value)     || 0;
-          const carbs    = parseFloat(document.getElementById('manualCarbs').value)    || 0;
-          if (!calories && !proteins && !fats && !carbs) { setStatus('Введи хотя бы одно значение', true); return; }
+          const fiber    = parseFloat(document.getElementById('manualFiber').value)    || 0;
+          if (!proteins && !fats && !fiber) { setStatus('Введи хотя бы одно значение', true); return; }
           entry = makeEntry({
             name: document.getElementById('manualName').value.trim() || 'Приём пищи',
-            calories, proteins, fats, carbs,
+            proteins, fats, fiber,
           });
-          ['manualName', 'manualCalories', 'manualProteins', 'manualFats', 'manualCarbs']
+          ['manualName', 'manualProteins', 'manualFats', 'manualFiber']
             .forEach(id => { document.getElementById(id).value = ''; });
         }
 
@@ -513,14 +545,13 @@
       }
     }
 
-    function makeEntry({ name, calories, proteins, fats, carbs }) {
+    function makeEntry({ name, proteins, fats, fiber }) {
       return {
         id: Date.now(),
         name: name || 'Блюдо',
-        calories: Math.round(+calories || 0),
         proteins: Math.round(+proteins || 0),
         fats:     Math.round(+fats     || 0),
-        carbs:    Math.round(+carbs    || 0),
+        fiber:    Math.round(+fiber    || 0),
         time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
       };
     }
@@ -532,19 +563,96 @@
       updateTotals();
     }
 
-    // ── Render ────────────────────────────────────────────────────────────────
+    // ── Totals & assessment ───────────────────────────────────────────────────
 
     function updateTotals() {
       const t = dayEntries.reduce(
-        (acc, e) => ({ calories: acc.calories + e.calories, proteins: acc.proteins + e.proteins,
-                       fats: acc.fats + e.fats, carbs: acc.carbs + e.carbs }),
-        { calories: 0, proteins: 0, fats: 0, carbs: 0 }
+        (acc, e) => ({ proteins: acc.proteins + e.proteins, fats: acc.fats + e.fats, fiber: acc.fiber + e.fiber }),
+        { proteins: 0, fats: 0, fiber: 0 }
       );
-      document.getElementById('totalCalories').textContent = t.calories;
+
       document.getElementById('totalProteins').textContent = t.proteins;
       document.getElementById('totalFats').textContent     = t.fats;
-      document.getElementById('totalCarbs').textContent    = t.carbs;
+      document.getElementById('totalFiber').textContent    = t.fiber;
+
+      const norms = getNorms();
+
+      // Update goals display and progress bars
+      if (norms) {
+        document.getElementById('goalProteins').textContent = norms.proteins;
+        document.getElementById('goalFats').textContent     = norms.fats;
+        document.getElementById('goalFiber').textContent    = norms.fiber;
+
+        setBar('barProteins', t.proteins, norms.proteins);
+        setBar('barFats',     t.fats,     norms.fats);
+        setBar('barFiber',    t.fiber,    norms.fiber);
+
+        showAssessment(t, norms);
+      } else {
+        document.getElementById('goalProteins').textContent = '—';
+        document.getElementById('goalFats').textContent     = '—';
+        document.getElementById('goalFiber').textContent    = '25';
+        setBar('barProteins', 0, 1);
+        setBar('barFats',     0, 1);
+        setBar('barFiber',    t.fiber, 25);
+        document.getElementById('assessment').classList.add('hidden');
+      }
     }
+
+    function setBar(id, value, goal) {
+      const pct = Math.min(Math.round(value / goal * 100), 120);
+      const el = document.getElementById(id);
+      el.style.width = pct + '%';
+      el.classList.remove('bg-blue-400', 'bg-amber-400', 'bg-green-400', 'bg-red-400');
+      const baseColor = id.includes('Proteins') ? 'bg-blue-400' : id.includes('Fats') ? 'bg-amber-400' : 'bg-green-400';
+      el.classList.add(pct > 110 ? 'bg-red-400' : baseColor);
+    }
+
+    function showAssessment(t, norms) {
+      if (dayEntries.length === 0) {
+        document.getElementById('assessment').classList.add('hidden');
+        return;
+      }
+
+      const pP = t.proteins / norms.proteins;
+      const pF = t.fats     / norms.fats;
+      const pFi = t.fiber   / norms.fiber;
+
+      const issues = [];
+      const praise = [];
+
+      if (pP >= 0.9)  praise.push('белок');   else if (pP < 0.6) issues.push('маловато белка');
+      if (pF >= 0.9)  praise.push('жиры');    else if (pF < 0.6) issues.push('маловато жиров');
+      if (pFi >= 0.9) praise.push('клетчатку'); else if (pFi < 0.6) issues.push('маловато клетчатки');
+      if (pP > 1.2) issues.push('многовато белка');
+      if (pF > 1.2) issues.push('многовато жиров');
+
+      let msg, color;
+      const score = (pP + pF + pFi) / 3;
+
+      if (score >= 0.9 && issues.length === 0) {
+        msg = '🏆 Отличный день! Все нормы выполнены — так держать!';
+        color = 'text-green-600';
+      } else if (score >= 0.7) {
+        const p = praise.length ? `Хорошо с ${praise.join(' и ')}. ` : '';
+        const i = issues.length ? `Стоит добавить: ${issues.join(', ')}.` : '';
+        msg = '👍 ' + p + i;
+        color = 'text-amber-600';
+      } else if (score >= 0.4) {
+        msg = `💪 Продолжай — ${issues.join(', ')}.`;
+        color = 'text-amber-500';
+      } else {
+        msg = `🍽 Сегодня очень мало съедено. Не забудь поесть!`;
+        color = 'text-rose-500';
+      }
+
+      const el = document.getElementById('assessment');
+      el.textContent = msg;
+      el.className = `mt-4 pt-3 border-t border-gray-100 text-sm text-center ${color}`;
+      el.classList.remove('hidden');
+    }
+
+    // ── Render log ────────────────────────────────────────────────────────────
 
     function renderLog() {
       const container = document.getElementById('foodLog');
@@ -560,14 +668,9 @@
               <div class="text-xs text-gray-400 mt-0.5">${e.time}</div>
             </div>
             <button onclick="deleteEntry(${e.id})"
-              class="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none ml-2 mt-0.5"
-              title="Удалить">&times;</button>
+              class="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none ml-2 mt-0.5">&times;</button>
           </div>
-          <div class="grid grid-cols-4 gap-1.5 mt-3">
-            <div class="bg-orange-50 rounded-lg p-1.5 text-center">
-              <div class="text-sm font-semibold text-orange-400">${e.calories}</div>
-              <div class="text-xs text-gray-400">ккал</div>
-            </div>
+          <div class="grid grid-cols-3 gap-1.5 mt-3">
             <div class="bg-blue-50 rounded-lg p-1.5 text-center">
               <div class="text-sm font-semibold text-blue-500">${e.proteins}г</div>
               <div class="text-xs text-gray-400">белки</div>
@@ -577,8 +680,8 @@
               <div class="text-xs text-gray-400">жиры</div>
             </div>
             <div class="bg-green-50 rounded-lg p-1.5 text-center">
-              <div class="text-sm font-semibold text-green-500">${e.carbs}г</div>
-              <div class="text-xs text-gray-400">углев.</div>
+              <div class="text-sm font-semibold text-green-500">${e.fiber}г</div>
+              <div class="text-xs text-gray-400">клетчатка</div>
             </div>
           </div>
         </div>
