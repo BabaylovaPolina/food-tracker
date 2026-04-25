@@ -585,9 +585,10 @@
       const bars = tracked.map(m => {
         const norm = getNorm(m.key);
         const total = totals[m.key];
-        const pct = norm ? Math.min(Math.round(total / norm * 100), 120) : 0;
+        const uncapped = norm ? Math.round(total / norm * 100) : 0;
+        const pct = m.key === 'proteins' ? Math.min(uncapped, 150) : Math.min(uncapped, 120);
         const overColor = 'bg-red-400';
-        const barColor  = pct > 110 ? overColor : m.bar;
+        const barColor  = (pct > 110 && m.key !== 'proteins') ? overColor : m.bar;
         const normText  = norm ? `${total}${m.unit} / ${norm}${m.unit}` : `${total}${m.unit}`;
         return `
           <div>
@@ -617,7 +618,7 @@
       const avg = ratios.reduce((s, r) => s + r, 0) / ratios.length;
 
       const low  = normedMacros.filter((m, i) => ratios[i] < 0.6).map(m => m.label.toLowerCase());
-      const high = normedMacros.filter((m, i) => ratios[i] > 1.2).map(m => m.label.toLowerCase());
+      const high = normedMacros.filter((m, i) => ratios[i] > 1.2 && m.key !== 'proteins').map(m => m.label.toLowerCase());
       const good = normedMacros.filter((m, i) => ratios[i] >= 0.9 && ratios[i] <= 1.1).map(m => m.label.toLowerCase());
 
       if (avg >= 0.9 && high.length === 0)
