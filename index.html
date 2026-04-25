@@ -38,105 +38,42 @@
     </div>
     <div class="flex gap-2">
       <button onclick="signInEmail()"
-        class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
-        Войти
-      </button>
+        class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">Войти</button>
       <button onclick="registerEmail()"
-        class="flex-1 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold py-2.5 rounded-xl text-sm transition-colors">
-        Регистрация
-      </button>
+        class="flex-1 bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 font-semibold py-2.5 rounded-xl text-sm transition-colors">Регистрация</button>
     </div>
     <div id="authError" class="hidden text-red-500 text-xs text-center mt-3"></div>
   </div>
 
-  <!-- Main app -->
+  <!-- App screen -->
   <div id="appScreen" class="hidden max-w-lg mx-auto p-4 pb-12">
 
-    <!-- Header -->
     <div class="flex items-center justify-between mb-5">
       <h1 class="text-xl font-bold text-rose-700">Дневник питания</h1>
       <button onclick="toggleSettings()" class="text-gray-400 hover:text-gray-600 text-xl px-1">&#9881;</button>
     </div>
 
-    <!-- Settings panel -->
-    <div id="settings" class="hidden bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100 space-y-4">
-      <div class="flex items-center justify-between">
-        <div class="text-sm text-gray-600 truncate pr-2">Вы вошли как <span id="userLabel" class="font-medium"></span></div>
-        <button onclick="signOut()" class="text-xs text-rose-500 hover:text-rose-700 shrink-0">Выйти</button>
-      </div>
-      <div class="border-t border-gray-100 pt-3">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Вес (кг)</label>
-        <div class="flex gap-2">
-          <input type="number" id="weightInput" placeholder="60" min="30" max="200"
-            class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
-          <button onclick="saveWeight()"
-            class="bg-rose-500 hover:bg-rose-600 text-white text-sm font-medium px-4 rounded-xl transition-colors">
-            Сохранить
-          </button>
-        </div>
-        <p id="normsHint" class="text-xs text-gray-400 mt-1 hidden"></p>
-      </div>
-      <div class="border-t border-gray-100 pt-3">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Anthropic API ключ</label>
-        <input type="password" id="apiKey" placeholder="sk-ant-..."
-          class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-          oninput="saveApiKey()">
-        <p class="text-xs text-gray-400 mt-1">Хранится только в браузере</p>
-      </div>
+    <!-- Settings panel (content rendered by JS) -->
+    <div id="settings" class="hidden bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
+      <div id="settingsContent"></div>
     </div>
 
-    <!-- Daily summary -->
+    <!-- Summary (rendered by JS) -->
     <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
       <div class="flex items-center justify-between mb-4">
         <button onclick="changeDay(-1)" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">&#8592;</button>
         <div class="text-xs text-gray-500 font-medium" id="dateDisplay"></div>
         <button onclick="changeDay(1)" id="btnNextDay" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-25 disabled:cursor-default">&#8594;</button>
       </div>
-
-      <!-- Progress bars -->
-      <div class="space-y-3" id="progressBars">
-        <div>
-          <div class="flex justify-between text-xs mb-1">
-            <span class="text-blue-600 font-medium">Белки</span>
-            <span class="text-gray-500"><span id="totalProteins">0</span>г / <span id="goalProteins">—</span>г</span>
-          </div>
-          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div id="barProteins" class="h-full bg-blue-400 rounded-full transition-all duration-500" style="width:0%"></div>
-          </div>
-        </div>
-        <div>
-          <div class="flex justify-between text-xs mb-1">
-            <span class="text-amber-600 font-medium">Жиры</span>
-            <span class="text-gray-500"><span id="totalFats">0</span>г / <span id="goalFats">—</span>г</span>
-          </div>
-          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div id="barFats" class="h-full bg-amber-400 rounded-full transition-all duration-500" style="width:0%"></div>
-          </div>
-        </div>
-        <div>
-          <div class="flex justify-between text-xs mb-1">
-            <span class="text-green-600 font-medium">Клетчатка</span>
-            <span class="text-gray-500"><span id="totalFiber">0</span>г / <span id="goalFiber">25</span>г</span>
-          </div>
-          <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div id="barFiber" class="h-full bg-green-400 rounded-full transition-all duration-500" style="width:0%"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Assessment -->
-      <div id="assessment" class="hidden mt-4 pt-3 border-t border-gray-100 text-sm text-center text-gray-600"></div>
+      <div id="summaryContent"></div>
     </div>
 
     <!-- Input card -->
     <div id="inputCard" class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-rose-100">
       <div class="flex gap-1 mb-4 bg-gray-100 rounded-xl p-1">
-        <button onclick="switchTab('text')" id="tab-text"
-          class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-rose-600">Текст</button>
-        <button onclick="switchTab('photo')" id="tab-photo"
-          class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Фото</button>
-        <button onclick="switchTab('manual')" id="tab-manual"
-          class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Вручную</button>
+        <button onclick="switchTab('text')"   id="tab-text"   class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-rose-600">Текст</button>
+        <button onclick="switchTab('photo')"  id="tab-photo"  class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Фото</button>
+        <button onclick="switchTab('manual')" id="tab-manual" class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Вручную</button>
       </div>
 
       <div id="panel-text">
@@ -148,10 +85,7 @@
       <div id="panel-photo" class="hidden">
         <div id="photoDropZone" onclick="document.getElementById('photoInput').click()"
           class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-rose-300 transition-colors">
-          <div id="photoPlaceholder">
-            <div class="text-4xl mb-2">&#128247;</div>
-            <div class="text-sm text-gray-400">Нажмите, чтобы выбрать фото</div>
-          </div>
+          <div id="photoPlaceholder"><div class="text-4xl mb-2">&#128247;</div><div class="text-sm text-gray-400">Нажмите, чтобы выбрать фото</div></div>
           <img id="photoPreview" class="hidden max-h-52 mx-auto rounded-lg object-contain">
         </div>
         <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)">
@@ -160,23 +94,7 @@
       <div id="panel-manual" class="hidden">
         <input type="text" id="manualName" placeholder="Название (необязательно)"
           class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-rose-300">
-        <div class="grid grid-cols-3 gap-2">
-          <div>
-            <label class="text-xs text-gray-500 pl-1">Белки (г)</label>
-            <input type="number" id="manualProteins" placeholder="0" min="0"
-              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
-          </div>
-          <div>
-            <label class="text-xs text-gray-500 pl-1">Жиры (г)</label>
-            <input type="number" id="manualFats" placeholder="0" min="0"
-              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
-          </div>
-          <div>
-            <label class="text-xs text-gray-500 pl-1">Клетчатка (г)</label>
-            <input type="number" id="manualFiber" placeholder="0" min="0"
-              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
-          </div>
-        </div>
+        <div id="manualFields" class="grid grid-cols-2 gap-2"></div>
       </div>
 
       <button onclick="addEntry()" id="submitBtn"
@@ -186,9 +104,7 @@
       <div id="statusMsg" class="hidden text-center text-xs mt-2"></div>
     </div>
 
-    <!-- Log -->
     <div id="foodLog" class="space-y-2 transition-opacity"></div>
-
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -196,38 +112,64 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
   <script>
-    const firebaseConfig = {
+    firebase.initializeApp({
       apiKey: "AIzaSyBrPqRg93W-lk4yOAURvJgzlvWuN69RiH4",
       authDomain: "food-tracker-776d1.firebaseapp.com",
       projectId: "food-tracker-776d1",
       storageBucket: "food-tracker-776d1.firebasestorage.app",
       messagingSenderId: "339630577973",
       appId: "1:339630577973:web:0746d92bbb8136a27f547c"
-    };
-
-    firebase.initializeApp(firebaseConfig);
+    });
     const auth = firebase.auth();
     const db   = firebase.firestore();
 
-    const SYSTEM_PROMPT = 'Ты нутрициолог. Отвечаешь ТОЛЬКО JSON без пояснений: {"name":"название кратко","proteins":число,"fats":число,"fiber":число}. Белки, жиры, клетчатка в граммах, числа округлённые. Оцени реалистичную порцию.';
+    // ── Macro definitions ─────────────────────────────────────────────────────
 
-    let currentTab = 'text';
+    const MACROS = [
+      { key: 'calories', label: 'Калории',    unit: 'ккал', bg: 'bg-orange-50', text: 'text-orange-400', bar: 'bg-orange-400', defaultNorm: 2000, mult: null },
+      { key: 'proteins', label: 'Белки',      unit: 'г',    bg: 'bg-blue-50',   text: 'text-blue-500',  bar: 'bg-blue-400',   defaultNorm: 100,  mult: 1.6  },
+      { key: 'fats',     label: 'Жиры',       unit: 'г',    bg: 'bg-amber-50',  text: 'text-amber-500', bar: 'bg-amber-400',  defaultNorm: 60,   mult: 1.0  },
+      { key: 'carbs',    label: 'Углеводы',   unit: 'г',    bg: 'bg-purple-50', text: 'text-purple-500',bar: 'bg-purple-400', defaultNorm: 250,  mult: null },
+      { key: 'fiber',    label: 'Клетчатка',  unit: 'г',    bg: 'bg-green-50',  text: 'text-green-500', bar: 'bg-green-400',  defaultNorm: 25,   mult: null },
+    ];
+
+    const DEFAULT_TRACKED = ['proteins', 'fats', 'fiber'];
+
+    // ── State ─────────────────────────────────────────────────────────────────
+
+    let currentUser   = null;
+    let userProfile   = { weight: null, trackedMacros: DEFAULT_TRACKED, customNorms: {} };
+    let viewDate      = getToday();
+    let dayEntries    = [];
+    let editingId     = null;
+    let unknownInForm = new Set();   // "не знаю" fields in add form
+    let unknownInEdit = new Set();   // "не знаю" fields in edit form
+    let currentTab    = 'text';
     let currentPhotoBase64 = null;
     let currentPhotoType   = null;
-    let viewDate    = getToday();
-    let dayEntries  = [];
-    let currentUser = null;
-    let userWeight  = null;
 
-    // ── Norms ─────────────────────────────────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
-    function getNorms() {
-      if (!userWeight) return null;
-      return {
-        proteins: Math.round(userWeight * 1.6),
-        fats:     Math.round(userWeight * 1.0),
-        fiber:    25,
-      };
+    function getMacro(key) { return MACROS.find(m => m.key === key); }
+
+    function getTrackedMacros() {
+      return MACROS.filter(m => (userProfile.trackedMacros || DEFAULT_TRACKED).includes(m.key));
+    }
+
+    function getNorm(key) {
+      const m = getMacro(key);
+      if (!m) return null;
+      const custom = (userProfile.customNorms || {})[key];
+      if (custom != null) return custom;
+      if (m.mult && userProfile.weight) return Math.round(userProfile.weight * m.mult);
+      return m.defaultNorm;
+    }
+
+    function buildSystemPrompt() {
+      const tracked = getTrackedMacros();
+      const fields  = tracked.map(m => `"${m.key}":число_или_null`).join(',');
+      const labels  = tracked.map(m => `${m.label}(${m.unit})`).join(', ');
+      return `Ты нутрициолог. Отвечаешь ТОЛЬКО JSON без пояснений: {"name":"кратко",${fields}}. ${labels}. Числа округлённые, null если не можешь оценить.`;
     }
 
     // ── Auth ──────────────────────────────────────────────────────────────────
@@ -237,9 +179,8 @@
       if (user) {
         document.getElementById('authScreen').classList.add('hidden');
         document.getElementById('appScreen').classList.remove('hidden');
-        document.getElementById('userLabel').textContent = user.displayName || user.email || '';
         const key = localStorage.getItem('anthropicApiKey');
-        if (key) document.getElementById('apiKey').value = key;
+        if (key) document.getElementById('apiKey') && (document.getElementById('apiKey').value = key);
         initApp();
       } else {
         document.getElementById('authScreen').classList.remove('hidden');
@@ -248,14 +189,9 @@
     });
 
     async function signInGoogle() {
-      try {
-        clearAuthError();
-        await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-      } catch (e) {
-        if (e.code !== 'auth/popup-closed-by-user') showAuthError(friendlyAuthError(e.code));
-      }
+      try { clearAuthError(); await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+      catch (e) { if (e.code !== 'auth/popup-closed-by-user') showAuthError(friendlyAuthError(e.code)); }
     }
-
     async function signInEmail() {
       const email = document.getElementById('authEmail').value.trim();
       const pass  = document.getElementById('authPassword').value;
@@ -263,7 +199,6 @@
       try { clearAuthError(); await auth.signInWithEmailAndPassword(email, pass); }
       catch (e) { showAuthError(friendlyAuthError(e.code)); }
     }
-
     async function registerEmail() {
       const email = document.getElementById('authEmail').value.trim();
       const pass  = document.getElementById('authPassword').value;
@@ -272,29 +207,14 @@
       try { clearAuthError(); await auth.createUserWithEmailAndPassword(email, pass); }
       catch (e) { showAuthError(friendlyAuthError(e.code)); }
     }
-
-    function signOut() {
-      auth.signOut();
-      document.getElementById('settings').classList.add('hidden');
-    }
-
-    function showAuthError(msg) {
-      if (!msg) return;
-      const el = document.getElementById('authError');
-      el.textContent = msg; el.classList.remove('hidden');
-    }
+    function signOut() { auth.signOut(); document.getElementById('settings').classList.add('hidden'); }
+    function showAuthError(msg) { if (!msg) return; const el = document.getElementById('authError'); el.textContent = msg; el.classList.remove('hidden'); }
     function clearAuthError() { document.getElementById('authError').classList.add('hidden'); }
-
     function friendlyAuthError(code) {
-      return ({
-        'auth/user-not-found':       'Пользователь не найден',
-        'auth/wrong-password':       'Неверный пароль',
-        'auth/invalid-credential':   'Неверный email или пароль',
-        'auth/email-already-in-use': 'Email уже используется',
-        'auth/invalid-email':        'Неверный формат email',
-        'auth/weak-password':        'Пароль слишком слабый',
-        'auth/too-many-requests':    'Слишком много попыток, попробуй позже',
-      })[code] || 'Ошибка входа';
+      return ({ 'auth/user-not-found':'Пользователь не найден','auth/wrong-password':'Неверный пароль',
+        'auth/invalid-credential':'Неверный email или пароль','auth/email-already-in-use':'Email уже используется',
+        'auth/invalid-email':'Неверный формат email','auth/weak-password':'Пароль слишком слабый',
+        'auth/too-many-requests':'Слишком много попыток' })[code] || 'Ошибка входа';
     }
 
     // ── Init ──────────────────────────────────────────────────────────────────
@@ -302,20 +222,16 @@
     async function initApp() {
       await loadProfile();
       viewDate = getToday();
+      renderSettingsPanel();
       updateDateDisplay();
+      renderManualFields();
       loadDay();
-
       document.getElementById('textInput').addEventListener('keydown', e => {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addEntry(); }
       });
-      ['manualName', 'manualProteins', 'manualFats', 'manualFiber'].forEach(id => {
-        document.getElementById(id).addEventListener('keydown', e => {
-          if (e.key === 'Enter') addEntry();
-        });
-      });
     }
 
-    // ── Profile (weight) ──────────────────────────────────────────────────────
+    // ── Profile ───────────────────────────────────────────────────────────────
 
     function profileRef() {
       return db.collection('users').doc(currentUser.uid).collection('profile').doc('data');
@@ -324,29 +240,145 @@
     async function loadProfile() {
       try {
         const doc = await profileRef().get();
-        if (doc.exists && doc.data().weight) {
-          userWeight = doc.data().weight;
-          document.getElementById('weightInput').value = userWeight;
-          updateNormsHint();
+        if (doc.exists) {
+          const d = doc.data();
+          userProfile = {
+            weight:       d.weight       ?? null,
+            trackedMacros: d.trackedMacros ?? DEFAULT_TRACKED,
+            customNorms:  d.customNorms  ?? {},
+          };
         }
       } catch (_) {}
     }
 
-    async function saveWeight() {
-      const val = parseFloat(document.getElementById('weightInput').value);
-      if (!val || val < 30 || val > 300) { return; }
-      userWeight = val;
-      await profileRef().set({ weight: val }, { merge: true });
-      updateNormsHint();
-      updateTotals();
+    async function saveProfile() {
+      await profileRef().set(userProfile, { merge: true });
     }
 
-    function updateNormsHint() {
-      const norms = getNorms();
-      const el = document.getElementById('normsHint');
-      if (!norms) { el.classList.add('hidden'); return; }
-      el.textContent = `Норма: белки ${norms.proteins}г, жиры ${norms.fats}г, клетчатка ${norms.fiber}г`;
-      el.classList.remove('hidden');
+    function saveApiKey() {
+      localStorage.setItem('anthropicApiKey', document.getElementById('apiKey').value.trim());
+    }
+
+    async function saveSettingsForm() {
+      const w = parseFloat(document.getElementById('s-weight').value);
+      if (w >= 30 && w <= 300) userProfile.weight = w;
+
+      userProfile.trackedMacros = MACROS
+        .filter(m => document.getElementById(`s-cb-${m.key}`)?.checked)
+        .map(m => m.key);
+      if (userProfile.trackedMacros.length === 0) userProfile.trackedMacros = DEFAULT_TRACKED;
+
+      userProfile.customNorms = {};
+      MACROS.forEach(m => {
+        const val = parseFloat(document.getElementById(`s-norm-${m.key}`)?.value);
+        if (!isNaN(val) && val > 0) userProfile.customNorms[m.key] = val;
+      });
+
+      await saveProfile();
+      renderSettingsPanel();
+      renderManualFields();
+      updateTotals();
+      document.getElementById('settings-saved').classList.remove('hidden');
+      setTimeout(() => document.getElementById('settings-saved')?.classList.add('hidden'), 1500);
+    }
+
+    // ── Settings panel render ─────────────────────────────────────────────────
+
+    function renderSettingsPanel() {
+      const user = auth.currentUser;
+      const autoLabel = m => m.mult && userProfile.weight
+        ? `авто: ${Math.round(userProfile.weight * m.mult)}${m.unit}`
+        : `по умолчанию: ${m.defaultNorm}${m.unit}`;
+
+      document.getElementById('settingsContent').innerHTML = `
+        <div class="flex items-center justify-between mb-4">
+          <div class="text-sm text-gray-600 truncate pr-2">Вы вошли как <span class="font-medium">${escHtml(user?.displayName || user?.email || '')}</span></div>
+          <button onclick="signOut()" class="text-xs text-rose-500 hover:text-rose-700 shrink-0">Выйти</button>
+        </div>
+
+        <div class="border-t border-gray-100 pt-3 mb-3">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Вес (кг)</label>
+          <input type="number" id="s-weight" value="${userProfile.weight || ''}" placeholder="60" min="30" max="300"
+            class="w-32 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+        </div>
+
+        <div class="border-t border-gray-100 pt-3 mb-3">
+          <div class="text-sm font-medium text-gray-700 mb-2">Отслеживаемые показатели</div>
+          <div class="space-y-2">
+            ${MACROS.map(m => `
+              <div class="flex items-center gap-2">
+                <input type="checkbox" id="s-cb-${m.key}" ${userProfile.trackedMacros.includes(m.key) ? 'checked' : ''}
+                  class="w-4 h-4 accent-rose-500">
+                <label for="s-cb-${m.key}" class="text-sm text-gray-700 w-24">${m.label}</label>
+                <span class="text-xs text-gray-400">норма:</span>
+                <input type="number" id="s-norm-${m.key}" min="0"
+                  value="${(userProfile.customNorms || {})[m.key] ?? ''}"
+                  placeholder="${autoLabel(m)}"
+                  class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-rose-300">
+                <span class="text-xs text-gray-400">${m.unit}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="border-t border-gray-100 pt-3 mb-3">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Anthropic API ключ</label>
+          <input type="password" id="apiKey" placeholder="sk-ant-..."
+            value="${localStorage.getItem('anthropicApiKey') || ''}"
+            class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+            oninput="saveApiKey()">
+          <p class="text-xs text-gray-400 mt-1">Хранится только в браузере</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="saveSettingsForm()"
+            class="bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
+            Сохранить
+          </button>
+          <span id="settings-saved" class="hidden text-xs text-green-600">Сохранено ✓</span>
+        </div>
+      `;
+    }
+
+    function toggleSettings() {
+      const el = document.getElementById('settings');
+      const wasHidden = el.classList.contains('hidden');
+      el.classList.toggle('hidden');
+      if (wasHidden) renderSettingsPanel();
+    }
+
+    // ── Manual fields render ──────────────────────────────────────────────────
+
+    function renderManualFields() {
+      const tracked = getTrackedMacros();
+      const cols = tracked.length <= 3 ? 'grid-cols-' + tracked.length : 'grid-cols-2 sm:grid-cols-3';
+      document.getElementById('manualFields').className = `grid ${cols} gap-2`;
+      document.getElementById('manualFields').innerHTML = tracked.map(m => `
+        <div>
+          <div class="flex items-center justify-between mb-0.5">
+            <label class="text-xs text-gray-500 pl-1">${m.label} (${m.unit})</label>
+            <button onclick="toggleUnknownForm('${m.key}')" id="form-unk-btn-${m.key}"
+              class="text-xs text-gray-400 hover:text-rose-400 transition-colors px-1">не знаю</button>
+          </div>
+          <input type="number" id="form-${m.key}" placeholder="0" min="0"
+            class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300">
+        </div>
+      `).join('');
+    }
+
+    function toggleUnknownForm(key) {
+      const inp = document.getElementById(`form-${key}`);
+      const btn = document.getElementById(`form-unk-btn-${key}`);
+      if (unknownInForm.has(key)) {
+        unknownInForm.delete(key);
+        inp.disabled = false; inp.classList.remove('bg-gray-50', 'text-gray-400');
+        inp.placeholder = '0'; btn.textContent = 'не знаю'; btn.classList.remove('text-rose-400');
+      } else {
+        unknownInForm.add(key);
+        inp.value = ''; inp.disabled = true;
+        inp.classList.add('bg-gray-50', 'text-gray-400'); inp.placeholder = '—';
+        btn.textContent = 'отменить'; btn.classList.add('text-rose-400');
+      }
     }
 
     // ── Firestore ─────────────────────────────────────────────────────────────
@@ -354,121 +386,72 @@
     function logRef(date) {
       return db.collection('users').doc(currentUser.uid).collection('logs').doc(date);
     }
-
     async function loadDay() {
       setDayLoading(true);
-      try {
-        const doc = await logRef(viewDate).get();
-        dayEntries = doc.exists ? (doc.data().entries || []) : [];
-      } catch (_) { dayEntries = []; }
-      renderLog();
-      updateTotals();
-      setDayLoading(false);
+      try { const doc = await logRef(viewDate).get(); dayEntries = doc.exists ? (doc.data().entries || []) : []; }
+      catch (_) { dayEntries = []; }
+      renderLog(); updateTotals(); setDayLoading(false);
     }
+    async function saveDay() { await logRef(viewDate).set({ entries: dayEntries }); }
+    function setDayLoading(on) { document.getElementById('foodLog').style.opacity = on ? '0.4' : '1'; }
 
-    async function saveDay() {
-      await logRef(viewDate).set({ entries: dayEntries });
-    }
+    // ── Date nav ──────────────────────────────────────────────────────────────
 
-    function setDayLoading(on) {
-      document.getElementById('foodLog').style.opacity = on ? '0.4' : '1';
-    }
-
-    // ── Date navigation ───────────────────────────────────────────────────────
-
-    function getToday() {
-      return new Date().toISOString().split('T')[0];
-    }
+    function getToday() { return new Date().toISOString().split('T')[0]; }
 
     function changeDay(delta) {
       const d = new Date(viewDate + 'T00:00:00');
       d.setDate(d.getDate() + delta);
       const next = d.toISOString().split('T')[0];
       if (next > getToday()) return;
-      viewDate = next;
-      updateDateDisplay();
-      loadDay();
+      viewDate = next; editingId = null;
+      updateDateDisplay(); loadDay();
     }
 
     function updateDateDisplay() {
       const today = getToday();
-      const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-      const yStr = yesterday.toISOString().split('T')[0];
+      const yest = new Date(); yest.setDate(yest.getDate() - 1);
+      const yStr = yest.toISOString().split('T')[0];
       const d = new Date(viewDate + 'T00:00:00');
-      const dateStr = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
-      let label;
-      if (viewDate === today)     label = 'Сегодня, ' + dateStr;
-      else if (viewDate === yStr) label = 'Вчера, ' + dateStr;
-      else label = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-      document.getElementById('dateDisplay').textContent = label;
+      const s = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+      document.getElementById('dateDisplay').textContent =
+        viewDate === today ? 'Сегодня, ' + s : viewDate === yStr ? 'Вчера, ' + s :
+        d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
       document.getElementById('btnNextDay').disabled = viewDate >= today;
       document.getElementById('inputCard').classList.toggle('hidden', viewDate !== today);
-    }
-
-    // ── Settings ──────────────────────────────────────────────────────────────
-
-    function saveApiKey() {
-      localStorage.setItem('anthropicApiKey', document.getElementById('apiKey').value.trim());
-    }
-    function toggleSettings() {
-      document.getElementById('settings').classList.toggle('hidden');
     }
 
     // ── Tabs ──────────────────────────────────────────────────────────────────
 
     function switchTab(tab) {
       currentTab = tab;
-      ['text', 'photo', 'manual'].forEach(t => {
+      ['text','photo','manual'].forEach(t => {
         document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
         const btn = document.getElementById(`tab-${t}`);
-        if (t === tab) { btn.classList.add('bg-white', 'shadow', 'text-rose-600'); btn.classList.remove('text-gray-500'); }
-        else           { btn.classList.remove('bg-white', 'shadow', 'text-rose-600'); btn.classList.add('text-gray-500'); }
+        if (t === tab) { btn.classList.add('bg-white','shadow','text-rose-600'); btn.classList.remove('text-gray-500'); }
+        else           { btn.classList.remove('bg-white','shadow','text-rose-600'); btn.classList.add('text-gray-500'); }
       });
       setStatus('');
     }
 
-    // ── Photo ─────────────────────────────────────────────────────────────────
-
     function handlePhotoSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+      const file = event.target.files[0]; if (!file) return;
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const dataUrl = e.target.result;
-        const [header, data] = dataUrl.split(',');
-        currentPhotoBase64 = data;
-        currentPhotoType = header.match(/:(.*?);/)[1];
+      reader.onload = e => {
+        const [header, data] = e.target.result.split(',');
+        currentPhotoBase64 = data; currentPhotoType = header.match(/:(.*?);/)[1];
         document.getElementById('photoPlaceholder').classList.add('hidden');
-        const preview = document.getElementById('photoPreview');
-        preview.src = dataUrl; preview.classList.remove('hidden');
+        const p = document.getElementById('photoPreview'); p.src = e.target.result; p.classList.remove('hidden');
       };
       reader.readAsDataURL(file);
-    }
-
-    // ── UI helpers ────────────────────────────────────────────────────────────
-
-    function setStatus(msg, isError = false) {
-      const el = document.getElementById('statusMsg');
-      if (!msg) { el.classList.add('hidden'); return; }
-      el.textContent = msg;
-      el.classList.remove('hidden', 'text-red-500', 'text-gray-400');
-      el.classList.add(isError ? 'text-red-500' : 'text-gray-400');
-    }
-
-    function setLoading(on) {
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = on;
-      btn.textContent = on ? 'Анализирую...' : 'Добавить';
-      btn.classList.toggle('opacity-60', on);
-      btn.classList.toggle('cursor-not-allowed', on);
     }
 
     // ── Claude API ────────────────────────────────────────────────────────────
 
     function extractJson(text) {
-      const match = text.match(/\{[\s\S]*?\}/);
-      if (!match) throw new Error('Не удалось разобрать ответ');
-      return JSON.parse(match[0]);
+      const m = text.match(/\{[\s\S]*?\}/);
+      if (!m) throw new Error('Не удалось разобрать ответ');
+      return JSON.parse(m[0]);
     }
 
     async function callClaude(messages) {
@@ -476,180 +459,181 @@
       if (!apiKey) throw new Error('Введи API ключ в настройках (шестерёнка сверху)');
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 300, system: SYSTEM_PROMPT, messages }),
+        headers: { 'Content-Type':'application/json','x-api-key':apiKey,
+          'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
+        body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:300, system:buildSystemPrompt(), messages }),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error?.message || `Ошибка API: ${res.status}`);
-      }
+      if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error?.message || `Ошибка API: ${res.status}`); }
       return (await res.json()).content[0].text;
     }
 
-    // ── Add / delete entry ────────────────────────────────────────────────────
+    // ── Add entry ─────────────────────────────────────────────────────────────
 
     async function addEntry() {
-      setStatus('');
-      let entry;
+      setStatus(''); let entry;
       try {
         if (currentTab === 'text') {
           const text = document.getElementById('textInput').value.trim();
           if (!text) { setStatus('Напиши, что съела', true); return; }
           setLoading(true);
-          entry = makeEntry(extractJson(await callClaude([{ role: 'user', content: text }])));
+          entry = makeEntry(extractJson(await callClaude([{ role:'user', content:text }])));
           document.getElementById('textInput').value = '';
 
         } else if (currentTab === 'photo') {
           if (!currentPhotoBase64) { setStatus('Выбери фото', true); return; }
           setLoading(true);
-          entry = makeEntry(extractJson(await callClaude([{
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: currentPhotoType, data: currentPhotoBase64 } },
-              { type: 'text', text: 'Что на фото и какое КБЖУ (белки, жиры, клетчатка)?' },
-            ],
-          }])));
+          entry = makeEntry(extractJson(await callClaude([{ role:'user', content:[
+            { type:'image', source:{ type:'base64', media_type:currentPhotoType, data:currentPhotoBase64 } },
+            { type:'text',  text:'Определи КБЖУ для еды на фото.' },
+          ]}])));
           currentPhotoBase64 = null; currentPhotoType = null;
           document.getElementById('photoPlaceholder').classList.remove('hidden');
           document.getElementById('photoPreview').classList.add('hidden');
           document.getElementById('photoInput').value = '';
 
         } else {
-          const proteins = parseFloat(document.getElementById('manualProteins').value) || 0;
-          const fats     = parseFloat(document.getElementById('manualFats').value)     || 0;
-          const fiber    = parseFloat(document.getElementById('manualFiber').value)    || 0;
-          if (!proteins && !fats && !fiber) { setStatus('Введи хотя бы одно значение', true); return; }
-          entry = makeEntry({
-            name: document.getElementById('manualName').value.trim() || 'Приём пищи',
-            proteins, fats, fiber,
+          const name = document.getElementById('manualName').value.trim() || 'Приём пищи';
+          const vals = {};
+          let hasAny = false;
+          getTrackedMacros().forEach(m => {
+            if (unknownInForm.has(m.key)) { vals[m.key] = null; }
+            else {
+              const v = parseFloat(document.getElementById(`form-${m.key}`)?.value) || 0;
+              vals[m.key] = v; if (v > 0) hasAny = true;
+            }
           });
-          ['manualName', 'manualProteins', 'manualFats', 'manualFiber']
-            .forEach(id => { document.getElementById(id).value = ''; });
+          if (!hasAny && unknownInForm.size === 0) { setStatus('Введи хотя бы одно значение', true); return; }
+          entry = makeEntry({ name, ...vals });
+          document.getElementById('manualName').value = '';
+          getTrackedMacros().forEach(m => {
+            const inp = document.getElementById(`form-${m.key}`);
+            if (inp) inp.value = '';
+          });
+          unknownInForm.clear();
+          renderManualFields();
         }
 
         dayEntries.push(entry);
-        await saveDay();
-        renderLog();
-        updateTotals();
+        await saveDay(); renderLog(); updateTotals();
         setStatus('Добавлено ✓');
-
-      } catch (err) {
-        setStatus(err.message, true);
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { setStatus(err.message, true); }
+      finally { setLoading(false); }
     }
 
-    function makeEntry({ name, proteins, fats, fiber }) {
-      return {
-        id: Date.now(),
-        name: name || 'Блюдо',
-        proteins: Math.round(+proteins || 0),
-        fats:     Math.round(+fats     || 0),
-        fiber:    Math.round(+fiber    || 0),
-        time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
-      };
+    function makeEntry(data) {
+      const e = { id: Date.now(), name: data.name || 'Блюдо',
+        time: new Date().toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' }) };
+      MACROS.forEach(m => {
+        const v = data[m.key];
+        e[m.key] = (v === null || v === undefined) ? null : Math.round(+v || 0);
+      });
+      return e;
     }
 
     async function deleteEntry(id) {
       dayEntries = dayEntries.filter(e => e.id !== id);
-      await saveDay();
+      if (editingId === id) editingId = null;
+      await saveDay(); renderLog(); updateTotals();
+    }
+
+    // ── Edit entry ────────────────────────────────────────────────────────────
+
+    function startEdit(id) {
+      editingId = id;
+      unknownInEdit = new Set();
+      const e = dayEntries.find(x => x.id === id);
+      MACROS.forEach(m => { if (e[m.key] === null) unknownInEdit.add(m.key); });
       renderLog();
-      updateTotals();
+    }
+
+    function cancelEdit() { editingId = null; renderLog(); }
+
+    async function saveEdit(id) {
+      const e = dayEntries.find(x => x.id === id);
+      if (!e) return;
+      e.name = document.getElementById(`edit-name-${id}`).value.trim() || e.name;
+      getTrackedMacros().forEach(m => {
+        if (unknownInEdit.has(m.key)) { e[m.key] = null; }
+        else { e[m.key] = Math.round(parseFloat(document.getElementById(`edit-${m.key}-${id}`)?.value) || 0); }
+      });
+      editingId = null;
+      await saveDay(); renderLog(); updateTotals();
+    }
+
+    function toggleUnknownEdit(id, key) {
+      const inp = document.getElementById(`edit-${key}-${id}`);
+      const btn = document.getElementById(`edit-unk-btn-${key}-${id}`);
+      if (unknownInEdit.has(key)) {
+        unknownInEdit.delete(key);
+        inp.disabled = false; inp.classList.remove('bg-gray-50');
+        inp.placeholder = '0'; btn.textContent = 'не знаю'; btn.classList.remove('text-rose-400');
+      } else {
+        unknownInEdit.add(key);
+        inp.value = ''; inp.disabled = true;
+        inp.classList.add('bg-gray-50'); inp.placeholder = '—';
+        btn.textContent = 'отменить'; btn.classList.add('text-rose-400');
+      }
     }
 
     // ── Totals & assessment ───────────────────────────────────────────────────
 
     function updateTotals() {
-      const t = dayEntries.reduce(
-        (acc, e) => ({ proteins: acc.proteins + e.proteins, fats: acc.fats + e.fats, fiber: acc.fiber + e.fiber }),
-        { proteins: 0, fats: 0, fiber: 0 }
-      );
+      const tracked = getTrackedMacros();
+      const totals = {};
+      tracked.forEach(m => { totals[m.key] = dayEntries.reduce((s, e) => s + (e[m.key] ?? 0), 0); });
 
-      document.getElementById('totalProteins').textContent = t.proteins;
-      document.getElementById('totalFats').textContent     = t.fats;
-      document.getElementById('totalFiber').textContent    = t.fiber;
+      const bars = tracked.map(m => {
+        const norm = getNorm(m.key);
+        const total = totals[m.key];
+        const pct = norm ? Math.min(Math.round(total / norm * 100), 120) : 0;
+        const overColor = 'bg-red-400';
+        const barColor  = pct > 110 ? overColor : m.bar;
+        const normText  = norm ? `${total}${m.unit} / ${norm}${m.unit}` : `${total}${m.unit}`;
+        return `
+          <div>
+            <div class="flex justify-between text-xs mb-1">
+              <span class="${m.text} font-medium">${m.label}</span>
+              <span class="text-gray-500">${normText}</span>
+            </div>
+            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div class="h-full ${barColor} rounded-full transition-all duration-500" style="width:${pct}%"></div>
+            </div>
+          </div>`;
+      }).join('');
 
-      const norms = getNorms();
-
-      // Update goals display and progress bars
-      if (norms) {
-        document.getElementById('goalProteins').textContent = norms.proteins;
-        document.getElementById('goalFats').textContent     = norms.fats;
-        document.getElementById('goalFiber').textContent    = norms.fiber;
-
-        setBar('barProteins', t.proteins, norms.proteins);
-        setBar('barFats',     t.fats,     norms.fats);
-        setBar('barFiber',    t.fiber,    norms.fiber);
-
-        showAssessment(t, norms);
-      } else {
-        document.getElementById('goalProteins').textContent = '—';
-        document.getElementById('goalFats').textContent     = '—';
-        document.getElementById('goalFiber').textContent    = '25';
-        setBar('barProteins', 0, 1);
-        setBar('barFats',     0, 1);
-        setBar('barFiber',    t.fiber, 25);
-        document.getElementById('assessment').classList.add('hidden');
-      }
+      const assessment = buildAssessment(totals, tracked);
+      document.getElementById('summaryContent').innerHTML = `
+        <div class="space-y-3">${bars}</div>
+        ${assessment ? `<div class="mt-4 pt-3 border-t border-gray-100 text-sm text-center ${assessment.color}">${assessment.text}</div>` : ''}
+      `;
     }
 
-    function setBar(id, value, goal) {
-      const pct = Math.min(Math.round(value / goal * 100), 120);
-      const el = document.getElementById(id);
-      el.style.width = pct + '%';
-      el.classList.remove('bg-blue-400', 'bg-amber-400', 'bg-green-400', 'bg-red-400');
-      const baseColor = id.includes('Proteins') ? 'bg-blue-400' : id.includes('Fats') ? 'bg-amber-400' : 'bg-green-400';
-      el.classList.add(pct > 110 ? 'bg-red-400' : baseColor);
-    }
+    function buildAssessment(totals, tracked) {
+      if (dayEntries.length === 0) return null;
+      const normedMacros = tracked.filter(m => getNorm(m.key));
+      if (normedMacros.length === 0) return null;
 
-    function showAssessment(t, norms) {
-      if (dayEntries.length === 0) {
-        document.getElementById('assessment').classList.add('hidden');
-        return;
+      const ratios = normedMacros.map(m => totals[m.key] / getNorm(m.key));
+      const avg = ratios.reduce((s, r) => s + r, 0) / ratios.length;
+
+      const low  = normedMacros.filter((m, i) => ratios[i] < 0.6).map(m => m.label.toLowerCase());
+      const high = normedMacros.filter((m, i) => ratios[i] > 1.2).map(m => m.label.toLowerCase());
+      const good = normedMacros.filter((m, i) => ratios[i] >= 0.9 && ratios[i] <= 1.1).map(m => m.label.toLowerCase());
+
+      if (avg >= 0.9 && high.length === 0)
+        return { text: '🏆 Отличный день! Все нормы выполнены — так держать!', color: 'text-green-600' };
+      if (high.length > 0 && avg > 1.1)
+        return { text: `⚠️ Многовато: ${high.join(', ')}. Следи за балансом.`, color: 'text-red-500' };
+      if (avg >= 0.7) {
+        const parts = [];
+        if (good.length)  parts.push(`хорошо с ${good.join(' и ')}`);
+        if (low.length)   parts.push(`добавь ${low.join(' и ')}`);
+        if (high.length)  parts.push(`чуть меньше ${high.join(' и ')}`);
+        return { text: '👍 ' + parts.join(', ').replace(/^./, c => c.toUpperCase()) + '.', color: 'text-amber-600' };
       }
-
-      const pP = t.proteins / norms.proteins;
-      const pF = t.fats     / norms.fats;
-      const pFi = t.fiber   / norms.fiber;
-
-      const issues = [];
-      const praise = [];
-
-      if (pP >= 0.9)  praise.push('белок');   else if (pP < 0.6) issues.push('маловато белка');
-      if (pF >= 0.9)  praise.push('жиры');    else if (pF < 0.6) issues.push('маловато жиров');
-      if (pFi >= 0.9) praise.push('клетчатку'); else if (pFi < 0.6) issues.push('маловато клетчатки');
-      if (pP > 1.2) issues.push('многовато белка');
-      if (pF > 1.2) issues.push('многовато жиров');
-
-      let msg, color;
-      const score = (pP + pF + pFi) / 3;
-
-      if (score >= 0.9 && issues.length === 0) {
-        msg = '🏆 Отличный день! Все нормы выполнены — так держать!';
-        color = 'text-green-600';
-      } else if (score >= 0.7) {
-        const p = praise.length ? `Хорошо с ${praise.join(' и ')}. ` : '';
-        const i = issues.length ? `Стоит добавить: ${issues.join(', ')}.` : '';
-        msg = '👍 ' + p + i;
-        color = 'text-amber-600';
-      } else if (score >= 0.4) {
-        msg = `💪 Продолжай — ${issues.join(', ')}.`;
-        color = 'text-amber-500';
-      } else {
-        msg = `🍽 Сегодня очень мало съедено. Не забудь поесть!`;
-        color = 'text-rose-500';
-      }
-
-      const el = document.getElementById('assessment');
-      el.textContent = msg;
-      el.className = `mt-4 pt-3 border-t border-gray-100 text-sm text-center ${color}`;
-      el.classList.remove('hidden');
+      if (avg >= 0.4)
+        return { text: `💪 Продолжай! Нужно больше: ${low.join(', ')}.`, color: 'text-amber-500' };
+      return { text: '🍽 Сегодня очень мало съедено. Не забудь поесть!', color: 'text-rose-500' };
     }
 
     // ── Render log ────────────────────────────────────────────────────────────
@@ -660,38 +644,83 @@
         container.innerHTML = '<p class="text-center text-gray-400 text-sm py-8">Пока ничего не добавлено</p>';
         return;
       }
-      container.innerHTML = dayEntries.slice().reverse().map(e => `
-        <div class="bg-white rounded-2xl p-4 shadow-sm border border-rose-100">
-          <div class="flex justify-between items-start">
-            <div>
-              <div class="font-medium text-gray-800 text-sm">${escHtml(e.name)}</div>
-              <div class="text-xs text-gray-400 mt-0.5">${e.time}</div>
-            </div>
-            <button onclick="deleteEntry(${e.id})"
-              class="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none ml-2 mt-0.5">&times;</button>
-          </div>
-          <div class="grid grid-cols-3 gap-1.5 mt-3">
-            <div class="bg-blue-50 rounded-lg p-1.5 text-center">
-              <div class="text-sm font-semibold text-blue-500">${e.proteins}г</div>
-              <div class="text-xs text-gray-400">белки</div>
-            </div>
-            <div class="bg-amber-50 rounded-lg p-1.5 text-center">
-              <div class="text-sm font-semibold text-amber-500">${e.fats}г</div>
-              <div class="text-xs text-gray-400">жиры</div>
-            </div>
-            <div class="bg-green-50 rounded-lg p-1.5 text-center">
-              <div class="text-sm font-semibold text-green-500">${e.fiber}г</div>
-              <div class="text-xs text-gray-400">клетчатка</div>
-            </div>
-          </div>
-        </div>
-      `).join('');
+      container.innerHTML = dayEntries.slice().reverse().map(e =>
+        e.id === editingId ? renderEditCard(e) : renderViewCard(e)
+      ).join('');
     }
 
+    function renderViewCard(e) {
+      const tracked = getTrackedMacros();
+      const macroBoxes = tracked.map(m => {
+        const val = e[m.key];
+        const display = val === null ? '<span class="text-gray-300">—</span>' : `${val}${m.unit === 'ккал' ? '' : 'г'}`;
+        return `<div class="${m.bg} rounded-lg p-1.5 text-center">
+          <div class="text-sm font-semibold ${m.text}">${display}</div>
+          <div class="text-xs text-gray-400">${m.label.toLowerCase()}</div>
+        </div>`;
+      }).join('');
+      const cols = tracked.length <= 3 ? `grid-cols-${tracked.length}` : tracked.length === 4 ? 'grid-cols-4' : 'grid-cols-3 sm:grid-cols-5';
+      return `
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-rose-100">
+          <div class="flex justify-between items-start">
+            <div><div class="font-medium text-gray-800 text-sm">${escHtml(e.name)}</div>
+              <div class="text-xs text-gray-400 mt-0.5">${e.time}</div></div>
+            <div class="flex gap-1 ml-2 mt-0.5">
+              <button onclick="startEdit(${e.id})" class="text-gray-300 hover:text-blue-400 transition-colors text-sm px-1" title="Редактировать">✏️</button>
+              <button onclick="deleteEntry(${e.id})" class="text-gray-300 hover:text-red-400 transition-colors text-lg leading-none px-1" title="Удалить">&times;</button>
+            </div>
+          </div>
+          <div class="grid ${cols} gap-1.5 mt-3">${macroBoxes}</div>
+        </div>`;
+    }
+
+    function renderEditCard(e) {
+      const tracked = getTrackedMacros();
+      const cols = tracked.length <= 3 ? `grid-cols-${tracked.length}` : tracked.length === 4 ? 'grid-cols-4' : 'grid-cols-3';
+      const fields = tracked.map(m => {
+        const isUnk = unknownInEdit.has(m.key);
+        return `<div>
+          <div class="flex items-center justify-between mb-0.5">
+            <label class="text-xs text-gray-500">${m.label}</label>
+            <button onclick="toggleUnknownEdit(${e.id},'${m.key}')" id="edit-unk-btn-${m.key}-${e.id}"
+              class="text-xs ${isUnk ? 'text-rose-400' : 'text-gray-400'} hover:text-rose-400 transition-colors">${isUnk ? 'отменить' : 'не знаю'}</button>
+          </div>
+          <input type="number" id="edit-${m.key}-${e.id}" min="0"
+            value="${isUnk ? '' : (e[m.key] ?? '')}"
+            placeholder="${isUnk ? '—' : '0'}"
+            ${isUnk ? 'disabled' : ''}
+            class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-rose-300 ${isUnk ? 'bg-gray-50' : ''}">
+        </div>`;
+      }).join('');
+      return `
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-blue-200">
+          <input type="text" id="edit-name-${e.id}" value="${escHtml(e.name)}"
+            class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium mb-3 focus:outline-none focus:ring-2 focus:ring-rose-300">
+          <div class="grid ${cols} gap-2 mb-3">${fields}</div>
+          <div class="flex gap-2">
+            <button onclick="saveEdit(${e.id})"
+              class="flex-1 bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold py-2 rounded-xl transition-colors">Сохранить</button>
+            <button onclick="cancelEdit()"
+              class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-semibold py-2 rounded-xl transition-colors">Отмена</button>
+          </div>
+        </div>`;
+    }
+
+    // ── Utils ─────────────────────────────────────────────────────────────────
+
+    function setStatus(msg, isError = false) {
+      const el = document.getElementById('statusMsg');
+      if (!msg) { el.classList.add('hidden'); return; }
+      el.textContent = msg; el.classList.remove('hidden','text-red-500','text-gray-400');
+      el.classList.add(isError ? 'text-red-500' : 'text-gray-400');
+    }
+    function setLoading(on) {
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = on; btn.textContent = on ? 'Анализирую...' : 'Добавить';
+      btn.classList.toggle('opacity-60', on); btn.classList.toggle('cursor-not-allowed', on);
+    }
     function escHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
   </script>
 
