@@ -50,6 +50,39 @@
     <div id="authError" class="hidden text-red-500 text-xs text-center mt-3"></div>
   </div>
 
+  <!-- Onboarding screen -->
+  <div id="onboardingScreen" class="hidden max-w-sm mx-auto px-6 pt-14 pb-12">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-display font-semibold text-[#2C3A2D] mb-2">Добро пожаловать</h1>
+      <p class="text-sm text-gray-400">Заполни несколько полей — их можно изменить позже в настройках</p>
+    </div>
+
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-[#E5DDD2] space-y-5">
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Вес (кг) <span class="text-gray-400 font-normal">— необязательно</span></label>
+        <input type="number" id="ob-weight" placeholder="60" min="30" max="300"
+          class="w-32 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]">
+      </div>
+
+      <div>
+        <div class="text-sm font-medium text-gray-700 mb-2">Что отслеживаем и нормы</div>
+        <div id="ob-macros" class="space-y-2"></div>
+      </div>
+
+      <div>
+        <div class="text-sm font-medium text-gray-700 mb-2">Время приёмов пищи</div>
+        <div class="space-y-1.5" id="ob-mealtimes"></div>
+      </div>
+
+    </div>
+
+    <button onclick="submitOnboarding()"
+      class="w-full mt-5 bg-[#2C3A2D] hover:bg-[#1E2B1F] text-white font-semibold py-3 rounded-xl transition-colors text-sm">
+      Начать →
+    </button>
+  </div>
+
   <!-- App screen -->
   <div id="appScreen" class="hidden max-w-6xl mx-auto p-4 pb-12">
 
@@ -272,7 +305,12 @@
     // ── Init ──────────────────────────────────────────────────────────────────
 
     async function initApp() {
-      await loadProfile();
+      const profileExists = await loadProfile();
+      if (!profileExists) { showOnboarding(); return; }
+      startMainApp();
+    }
+
+    function startMainApp() {
       viewDate = getToday();
       renderSettingsPanel();
       updateDateDisplay();
@@ -290,6 +328,77 @@
       } else {
         document.getElementById('rightColumn').style.display = 'none';
       }
+    }
+
+    // ── Onboarding ────────────────────────────────────────────────────────────
+
+    function showOnboarding() {
+      document.getElementById('appScreen').classList.add('hidden');
+      document.getElementById('onboardingScreen').classList.remove('hidden');
+
+      const autoLabel = (m) => m.mult ? `авто по весу` : `${m.defaultNorm} ${m.unit}`;
+
+      document.getElementById('ob-macros').innerHTML = MACROS.map(m => `
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="ob-cb-${m.key}" checked class="w-4 h-4 accent-[#2C3A2D]">
+          <label for="ob-cb-${m.key}" class="text-sm text-gray-700 w-24">${m.label}</label>
+          <span class="text-xs text-gray-400">норма:</span>
+          <input type="number" id="ob-norm-${m.key}" min="0"
+            placeholder="${autoLabel(m)}"
+            class="flex-1 border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-[#B8975A]">
+          <span class="text-xs text-gray-400">${m.unit}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('ob-mealtimes').innerHTML = `
+        ${['Завтрак', 'Обед', 'Ужин'].map((name, i, arr) => `
+          <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-600 w-20">${name}</span>
+            <span class="text-xs text-gray-400">с</span>
+            <input type="number" id="ob-mt-${name}" min="0" max="23"
+              value="${DEFAULT_MEAL_TIMES[name]}"
+              class="w-14 border border-gray-200 rounded-lg px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-[#B8975A]">
+            <span class="text-xs text-gray-400">:00${i === arr.length - 1 ? ' до' : ''}</span>
+            ${i === arr.length - 1 ? `
+              <input type="number" id="ob-mt-end" min="0" max="24"
+                value="${DEFAULT_MEAL_TIMES.end}"
+                class="w-14 border border-gray-200 rounded-lg px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-[#B8975A]">
+              <span class="text-xs text-gray-400">:00</span>
+            ` : ''}
+          </div>
+        `).join('')}
+      `;
+    }
+
+    async function submitOnboarding() {
+      const w = parseFloat(document.getElementById('ob-weight').value);
+      userProfile.weight = (w >= 30 && w <= 300) ? w : null;
+
+      userProfile.trackedMacros = MACROS
+        .filter(m => document.getElementById(`ob-cb-${m.key}`)?.checked)
+        .map(m => m.key);
+      if (userProfile.trackedMacros.length === 0) userProfile.trackedMacros = MACROS.map(m => m.key);
+
+      userProfile.customNorms = {};
+      MACROS.forEach(m => {
+        const val = parseFloat(document.getElementById(`ob-norm-${m.key}`)?.value);
+        if (!isNaN(val) && val > 0) userProfile.customNorms[m.key] = val;
+      });
+
+      const newTimes = { ...DEFAULT_MEAL_TIMES };
+      ['Завтрак', 'Обед', 'Ужин'].forEach(name => {
+        const val = parseInt(document.getElementById(`ob-mt-${name}`)?.value);
+        if (!isNaN(val) && val >= 0 && val <= 23) newTimes[name] = val;
+      });
+      const endVal = parseInt(document.getElementById('ob-mt-end')?.value);
+      if (!isNaN(endVal) && endVal >= 0 && endVal <= 24) newTimes.end = endVal;
+      userProfile.mealTimes = newTimes;
+
+      await saveProfile();
+
+      document.getElementById('onboardingScreen').classList.add('hidden');
+      document.getElementById('appScreen').classList.remove('hidden');
+      startMainApp();
     }
 
     function switchMobileTab(tab) {
@@ -321,8 +430,10 @@
             customNorms:   d.customNorms   ?? {},
             mealTimes:     d.mealTimes     ? { ...DEFAULT_MEAL_TIMES, ...d.mealTimes } : { ...DEFAULT_MEAL_TIMES },
           };
+          return true;
         }
-      } catch (_) {}
+        return false;
+      } catch (_) { return true; }
     }
 
     async function saveProfile() {
