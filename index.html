@@ -276,6 +276,7 @@
       if (user) {
         document.getElementById('authScreen').classList.add('hidden');
         document.getElementById('appScreen').classList.remove('hidden');
+        saveUserRegistry(user);
         initApp();
       } else {
         document.getElementById('authScreen').classList.remove('hidden');
@@ -431,6 +432,18 @@
     }
 
     // ── Profile ───────────────────────────────────────────────────────────────
+
+    function saveUserRegistry(user) {
+      const ref = db.collection('users').doc(user.uid).collection('registry').doc('info');
+      ref.get().then(doc => {
+        const now = firebase.firestore.FieldValue.serverTimestamp();
+        if (!doc.exists) {
+          ref.set({ email: user.email || null, displayName: user.displayName || null, createdAt: now, lastSeen: now });
+        } else {
+          ref.update({ lastSeen: now });
+        }
+      }).catch(() => {});
+    }
 
     function profileRef() {
       return db.collection('users').doc(currentUser.uid).collection('profile').doc('data');
