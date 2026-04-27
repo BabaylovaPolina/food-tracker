@@ -182,7 +182,7 @@
     ];
 
     const DEFAULT_TRACKED    = ['proteins', 'fats', 'fiber'];
-    const DEFAULT_MEAL_TIMES = { Завтрак: 6, Обед: 11, Перекус: 15, Ужин: 18, end: 23 };
+    const DEFAULT_MEAL_TIMES = { Завтрак: 6, Обед: 11, Ужин: 18, end: 23 };
 
     // ── State ─────────────────────────────────────────────────────────────────
 
@@ -343,7 +343,7 @@
         if (!isNaN(val) && val > 0) userProfile.customNorms[m.key] = val;
       });
 
-      const meals = ['Завтрак', 'Обед', 'Перекус', 'Ужин'];
+      const meals = ['Завтрак', 'Обед', 'Ужин'];
       const newTimes = { ...DEFAULT_MEAL_TIMES };
       meals.forEach(name => {
         const val = parseInt(document.getElementById(`s-mt-${name}`)?.value);
@@ -402,7 +402,7 @@
         <div class="border-t border-gray-100 pt-3 mb-3">
           <div class="text-sm font-medium text-gray-700 mb-2">Время приёмов пищи</div>
           <div class="space-y-1.5">
-            ${['Завтрак', 'Обед', 'Перекус', 'Ужин'].map((name, i, arr) => `
+            ${['Завтрак', 'Обед', 'Ужин'].map((name, i, arr) => `
               <div class="flex items-center gap-2">
                 <span class="text-sm text-gray-600 w-20">${name}</span>
                 <span class="text-xs text-gray-400">с</span>
@@ -500,10 +500,9 @@
     function getDefaultMealName() {
       const h = new Date().getHours();
       const t = userProfile.mealTimes || DEFAULT_MEAL_TIMES;
-      if (h >= t.Завтрак && h < t.Обед)    return 'Завтрак';
-      if (h >= t.Обед    && h < t.Перекус) return 'Обед';
-      if (h >= t.Перекус && h < t.Ужин)   return 'Перекус';
-      if (h >= t.Ужин    && h < t.end)     return 'Ужин';
+      if (h >= t.Завтрак && h < t.Обед) return 'Завтрак';
+      if (h >= t.Обед    && h < t.Ужин) return 'Обед';
+      if (h >= t.Ужин    && h < t.end)  return 'Ужин';
       return '';
     }
 
