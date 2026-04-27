@@ -785,7 +785,7 @@
           setLoading(true);
           const parsedPhoto = extractJson(await callAI([
             { inline_data: { mime_type: currentPhotoType, data: currentPhotoBase64 } },
-            { text: 'Определи КБЖУ для еды на фото.' },
+            { text: 'Определи КБЖУ для еды на фото. Добавь поле "description" с кратким описанием блюда (1-2 предложения на русском).' },
           ]));
           parsedPhoto.name = document.getElementById('mealName').value.trim() || parsedPhoto.name;
           const thumb = await resizePhoto(currentPhotoBase64, currentPhotoType);
@@ -828,6 +828,7 @@
       const e = { id: Date.now(), name: data.name || 'Блюдо',
         time: new Date().toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' }) };
       if (source) e.source = source;
+      if (data.description) e.description = data.description;
       MACROS.forEach(m => {
         const v = data[m.key];
         e[m.key] = (v === null || v === undefined) ? null : Math.round(+v || 0);
@@ -1002,7 +1003,8 @@
               ${e.source ? (
                 e.source.type === 'text'
                   ? `<div class="text-xs text-gray-400 italic mt-1 leading-relaxed line-clamp-2">${escHtml(e.source.content)}</div>`
-                  : `<img src="data:image/jpeg;base64,${e.source.content}" onclick="openPhoto('${e.source.content}')" class="h-10 w-10 rounded-lg object-cover mt-1.5 cursor-pointer">`
+                  : `${e.description ? `<div class="text-xs text-gray-500 mt-1 leading-relaxed">${escHtml(e.description)}</div>` : ''}
+                     <img src="data:image/jpeg;base64,${e.source.content}" onclick="openPhoto('${e.source.content}')" class="h-10 w-10 rounded-lg object-cover mt-1.5 cursor-pointer">`
               ) : ''}
             </div>
             <div class="flex gap-1 shrink-0 mt-0.5">
