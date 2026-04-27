@@ -181,7 +181,8 @@
       { key: 'fiber',    label: 'Клетчатка', unit: 'г',    color: '#567860', bg: 'bg-[#EEF3EF]', text: 'text-[#486850]', bar: 'bg-[#567860]', defaultNorm: 25,   mult: null },
     ];
 
-    const DEFAULT_TRACKED = ['proteins', 'fats', 'fiber'];
+    const DEFAULT_TRACKED    = ['proteins', 'fats', 'fiber'];
+    const DEFAULT_MEAL_TIMES = { Завтрак: 6, Обед: 11, Перекус: 15, Ужин: 18, end: 23 };
 
     // ── State ─────────────────────────────────────────────────────────────────
 
@@ -190,7 +191,7 @@
     let chartInstances = [];
     let mobileTab      = 'today';
     let draftsByDate   = {};
-    let userProfile   = { weight: null, trackedMacros: DEFAULT_TRACKED, customNorms: {} };
+    let userProfile   = { weight: null, trackedMacros: DEFAULT_TRACKED, customNorms: {}, mealTimes: { ...DEFAULT_MEAL_TIMES } };
     let viewDate      = getToday();
     let dayEntries    = [];
     let editingId     = null;
@@ -314,9 +315,10 @@
         if (doc.exists) {
           const d = doc.data();
           userProfile = {
-            weight:       d.weight       ?? null,
+            weight:        d.weight        ?? null,
             trackedMacros: d.trackedMacros ?? DEFAULT_TRACKED,
-            customNorms:  d.customNorms  ?? {},
+            customNorms:   d.customNorms   ?? {},
+            mealTimes:     d.mealTimes     ? { ...DEFAULT_MEAL_TIMES, ...d.mealTimes } : { ...DEFAULT_MEAL_TIMES },
           };
         }
       } catch (_) {}
@@ -340,6 +342,16 @@
         const val = parseFloat(document.getElementById(`s-norm-${m.key}`)?.value);
         if (!isNaN(val) && val > 0) userProfile.customNorms[m.key] = val;
       });
+
+      const meals = ['Завтрак', 'Обед', 'Перекус', 'Ужин'];
+      const newTimes = { ...DEFAULT_MEAL_TIMES };
+      meals.forEach(name => {
+        const val = parseInt(document.getElementById(`s-mt-${name}`)?.value);
+        if (!isNaN(val) && val >= 0 && val <= 23) newTimes[name] = val;
+      });
+      const endVal = parseInt(document.getElementById('s-mt-end')?.value);
+      if (!isNaN(endVal) && endVal >= 0 && endVal <= 24) newTimes.end = endVal;
+      userProfile.mealTimes = newTimes;
 
       await saveProfile();
       renderSettingsPanel();
@@ -387,7 +399,29 @@
           </div>
         </div>
 
-<div class="flex items-center gap-3">
+        <div class="border-t border-gray-100 pt-3 mb-3">
+          <div class="text-sm font-medium text-gray-700 mb-2">Время приёмов пищи</div>
+          <div class="space-y-1.5">
+            ${['Завтрак', 'Обед', 'Перекус', 'Ужин'].map((name, i, arr) => `
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-600 w-20">${name}</span>
+                <span class="text-xs text-gray-400">с</span>
+                <input type="number" id="s-mt-${name}" min="0" max="23"
+                  value="${(userProfile.mealTimes || DEFAULT_MEAL_TIMES)[name]}"
+                  class="w-14 border border-gray-200 rounded-lg px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-[#B8975A]">
+                <span class="text-xs text-gray-400">:00${i === arr.length - 1 ? ' до' : ''}</span>
+                ${i === arr.length - 1 ? `
+                  <input type="number" id="s-mt-end" min="0" max="24"
+                    value="${(userProfile.mealTimes || DEFAULT_MEAL_TIMES).end}"
+                    class="w-14 border border-gray-200 rounded-lg px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-[#B8975A]">
+                  <span class="text-xs text-gray-400">:00</span>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
           <button onclick="saveSettingsForm()"
             class="bg-[#2C3A2D] hover:bg-[#1E2B1F] text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
             Сохранить
@@ -465,10 +499,11 @@
 
     function getDefaultMealName() {
       const h = new Date().getHours();
-      if (h >= 6  && h < 11) return 'Завтрак';
-      if (h >= 11 && h < 15) return 'Обед';
-      if (h >= 15 && h < 18) return 'Перекус';
-      if (h >= 18 && h < 23) return 'Ужин';
+      const t = userProfile.mealTimes || DEFAULT_MEAL_TIMES;
+      if (h >= t.Завтрак && h < t.Обед)    return 'Завтрак';
+      if (h >= t.Обед    && h < t.Перекус) return 'Обед';
+      if (h >= t.Перекус && h < t.Ужин)   return 'Перекус';
+      if (h >= t.Ужин    && h < t.end)     return 'Ужин';
       return '';
     }
 
