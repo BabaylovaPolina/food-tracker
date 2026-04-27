@@ -745,10 +745,22 @@
       const file = event.target.files[0]; if (!file) return;
       const reader = new FileReader();
       reader.onload = e => {
-        const [header, data] = e.target.result.split(',');
-        currentPhotoBase64 = data; currentPhotoType = header.match(/:(.*?);/)[1];
-        document.getElementById('photoPlaceholder').classList.add('hidden');
-        const p = document.getElementById('photoPreview'); p.src = e.target.result; p.classList.remove('hidden');
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 1024;
+          const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+          const w = Math.round(img.width * scale);
+          const h = Math.round(img.height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          const [, data] = dataUrl.split(',');
+          currentPhotoBase64 = data; currentPhotoType = 'image/jpeg';
+          document.getElementById('photoPlaceholder').classList.add('hidden');
+          const p = document.getElementById('photoPreview'); p.src = dataUrl; p.classList.remove('hidden');
+        };
+        img.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }
