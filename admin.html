@@ -54,7 +54,9 @@
   </div>
 
   <script>
-    let savedToken = localStorage.getItem('adminToken') || '';
+    function esc(str) { return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    let savedToken = sessionStorage.getItem('adminToken') || '';
     if (savedToken) document.getElementById('tokenInput').value = savedToken;
 
     function fmtDate(ts) {
@@ -66,7 +68,7 @@
     async function loadUsers() {
       const token = document.getElementById('tokenInput').value.trim();
       if (!token) return;
-      localStorage.setItem('adminToken', token);
+      sessionStorage.setItem('adminToken', token);
 
       document.getElementById('loginError').classList.add('hidden');
       document.getElementById('usersSection').classList.add('hidden');
@@ -88,8 +90,8 @@
         document.getElementById('usersCount').textContent = `${users.length} пользователей`;
         document.getElementById('usersTable').innerHTML = users.map(u => `
           <tr class="border-b border-gray-50 last:border-0 hover:bg-[#FAF8F5] transition-colors">
-            <td class="px-4 py-3 text-gray-800">${u.email || '—'}</td>
-            <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">${u.displayName || '—'}</td>
+            <td class="px-4 py-3 text-gray-800">${esc(u.email) || '—'}</td>
+            <td class="px-4 py-3 text-gray-500 hidden sm:table-cell">${esc(u.displayName) || '—'}</td>
             <td class="px-4 py-3 text-gray-400 text-xs">${fmtDate(u.createdAt)}</td>
             <td class="px-4 py-3 text-gray-400 text-xs hidden sm:table-cell">${fmtDate(u.lastSeen)}</td>
           </tr>

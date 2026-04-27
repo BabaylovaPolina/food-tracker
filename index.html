@@ -743,6 +743,12 @@
 
     function handlePhotoSelect(event) {
       const file = event.target.files[0]; if (!file) return;
+      if (!['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'].includes(file.type)) {
+        setStatus('Поддерживаются только JPEG, PNG, WebP', true); return;
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        setStatus('Файл слишком большой (макс. 20 МБ)', true); return;
+      }
       const reader = new FileReader();
       reader.onload = e => {
         const img = new Image();
