@@ -51,6 +51,11 @@
     <div id="authError" class="hidden text-red-500 text-xs text-center mt-3"></div>
   </div>
 
+  <!-- Photo lightbox -->
+  <div id="photoLightbox" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" onclick="closePhoto()">
+    <img id="lightboxImg" src="" class="max-w-full max-h-full rounded-xl object-contain">
+  </div>
+
   <!-- Onboarding screen -->
   <div id="onboardingScreen" class="hidden max-w-sm mx-auto px-6 pt-14 pb-12">
     <div class="text-center mb-8">
@@ -831,6 +836,15 @@
       });
     }
 
+    function openPhoto(base64) {
+      document.getElementById('lightboxImg').src = `data:image/jpeg;base64,${base64}`;
+      document.getElementById('photoLightbox').classList.remove('hidden');
+    }
+    function closePhoto() {
+      document.getElementById('photoLightbox').classList.add('hidden');
+      document.getElementById('lightboxImg').src = '';
+    }
+
     async function deleteEntry(id) {
       dayEntries = dayEntries.filter(e => e.id !== id);
       if (editingId === id) editingId = null;
@@ -973,7 +987,7 @@
               ${e.source ? (
                 e.source.type === 'text'
                   ? `<div class="text-xs text-gray-400 italic mt-1 leading-relaxed line-clamp-2">${escHtml(e.source.content)}</div>`
-                  : `<img src="data:image/jpeg;base64,${e.source.content}" class="h-10 w-10 rounded-lg object-cover mt-1.5">`
+                  : `<img src="data:image/jpeg;base64,${e.source.content}" onclick="openPhoto('${e.source.content}')" class="h-10 w-10 rounded-lg object-cover mt-1.5 cursor-pointer">`
               ) : ''}
             </div>
             <div class="flex gap-1 shrink-0 mt-0.5">
