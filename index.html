@@ -261,6 +261,10 @@
 
     // ── Auth ──────────────────────────────────────────────────────────────────
 
+    auth.getRedirectResult().catch(e => {
+      if (e.code && e.code !== 'auth/popup-closed-by-user') showAuthError(friendlyAuthError(e.code));
+    });
+
     auth.onAuthStateChanged(user => {
       currentUser = user;
       if (user) {
@@ -274,8 +278,15 @@
     });
 
     async function signInGoogle() {
-      try { clearAuthError(); await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-      catch (e) { if (e.code !== 'auth/popup-closed-by-user') showAuthError(friendlyAuthError(e.code)); }
+      try {
+        clearAuthError();
+        const provider = new firebase.auth.GoogleAuthProvider();
+        if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+          await auth.signInWithRedirect(provider);
+        } else {
+          await auth.signInWithPopup(provider);
+        }
+      } catch (e) { if (e.code !== 'auth/popup-closed-by-user') showAuthError(friendlyAuthError(e.code)); }
     }
     async function signInEmail() {
       const email = document.getElementById('authEmail').value.trim();
