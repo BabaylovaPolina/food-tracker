@@ -118,16 +118,16 @@
 
         <!-- Date navigation -->
         <div class="flex items-center justify-between mb-3 px-1">
-          <button onclick="changeDay(-1)" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">&#8592;</button>
+          <button onclick="changeDay(-1)" class="text-[#2C3A2D] hover:text-[#1E2B1F] px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">&#8592;</button>
           <div class="flex items-center gap-1.5">
-            <div class="text-sm font-medium text-[#2C3A2D]" id="dateDisplay"></div>
+            <div class="font-display text-lg font-semibold text-[#2C3A2D]" id="dateDisplay"></div>
             <div class="relative">
               <span class="text-gray-400 hover:text-[#B8975A] transition-colors text-base leading-none cursor-pointer" title="Выбрать дату">&#128197;</span>
               <input type="date" id="datePicker" onchange="jumpToDate(this.value)"
                 class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
             </div>
           </div>
-          <button onclick="changeDay(1)" id="btnNextDay" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-25 disabled:cursor-default">&#8594;</button>
+          <button onclick="changeDay(1)" id="btnNextDay" class="text-[#2C3A2D] hover:text-[#1E2B1F] px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-25 disabled:cursor-default">&#8594;</button>
         </div>
 
         <!-- Summary card -->
