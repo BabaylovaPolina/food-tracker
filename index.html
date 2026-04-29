@@ -135,15 +135,6 @@
 
         <!-- Input card -->
         <div id="inputCard" class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
-          <div class="flex items-center gap-2 mb-3">
-            <span class="text-xs text-gray-400 shrink-0">Время:</span>
-            <input type="time" id="timeStart"
-              class="border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]">
-            <span class="text-xs text-gray-400">—</span>
-            <input type="time" id="timeEnd"
-              class="border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]">
-          </div>
-
           <div class="flex gap-1 mb-4 bg-gray-100 rounded-xl p-1">
             <button onclick="switchTab('text')"   id="tab-text"   class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-[#3A5235]">Текст</button>
             <button onclick="switchTab('photo')"  id="tab-photo"  class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Фото</button>
@@ -650,13 +641,7 @@ function getDefaultMealName() {
       return timeName || 'Перекус';
     }
 
-    function resetMealName() {
-      const now = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-      const timeInput = document.getElementById('timeStart');
-      if (timeInput) timeInput.value = now;
-      const timeEnd = document.getElementById('timeEnd');
-      if (timeEnd) timeEnd.value = '';
-    }
+    function resetMealName() {}
 
     function jumpToDate(dateStr) {
       if (!dateStr || dateStr > getToday()) return;
@@ -827,11 +812,8 @@ function getDefaultMealName() {
     }
 
     function makeEntry(data, source) {
-      const timeStart = document.getElementById('timeStart')?.value ||
-        new Date().toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' });
-      const timeEnd = document.getElementById('timeEnd')?.value || '';
-      const e = { id: Date.now(), name: data.name || 'Блюдо', time: timeStart };
-      if (timeEnd) e.timeEnd = timeEnd;
+      const e = { id: Date.now(), name: data.name || 'Блюдо',
+        time: new Date().toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' }) };
       if (source) e.source = source;
       if (data.description) e.description = data.description;
       MACROS.forEach(m => {
