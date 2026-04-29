@@ -136,22 +136,23 @@
         <!-- Input card -->
         <div id="inputCard" class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
           <div class="flex gap-1 mb-4 bg-gray-100 rounded-xl p-1">
-            <button onclick="switchTab('text')"   id="tab-text"   class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-[#3A5235]">Текст</button>
-            <button onclick="switchTab('photo')"  id="tab-photo"  class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Фото</button>
+            <button onclick="switchTab('main')"   id="tab-main"   class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all bg-white shadow text-[#3A5235]">Описание</button>
             <button onclick="switchTab('manual')" id="tab-manual" class="flex-1 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-500">Вручную</button>
           </div>
 
-          <div id="panel-text">
+          <div id="panel-main">
             <textarea id="textInput" rows="3"
-              placeholder="Например: 200г куриной грудки и 150г гречки&#10;Enter — добавить, Shift+Enter — новая строка"
+              placeholder="Что съела? Можно добавить фото&#10;Enter — добавить, Shift+Enter — новая строка"
               class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A] resize-none"></textarea>
-          </div>
-
-          <div id="panel-photo" class="hidden">
-            <div id="photoDropZone" onclick="document.getElementById('photoInput').click()"
-              class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center cursor-pointer hover:border-[#C4B5A0] transition-colors">
-              <div id="photoPlaceholder"><div class="text-4xl mb-2">&#128247;</div><div class="text-sm text-gray-400">Нажмите, чтобы выбрать фото</div></div>
-              <img id="photoPreview" class="hidden max-h-52 mx-auto rounded-lg object-contain">
+            <div class="flex items-center gap-3 mt-2">
+              <button onclick="document.getElementById('photoInput').click()"
+                class="flex items-center gap-1 text-xs text-gray-400 hover:text-[#B8975A] transition-colors">
+                &#128247; Прикрепить фото
+              </button>
+              <div id="photoAttached" class="hidden flex items-center gap-1.5">
+                <img id="photoPreview" class="h-8 w-8 rounded-lg object-cover cursor-pointer" onclick="openPhoto(currentPhotoBase64)">
+                <button onclick="removePhotoAttachment()" class="text-gray-300 hover:text-red-400 transition-colors text-base leading-none">&times;</button>
+              </div>
             </div>
             <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="handlePhotoSelect(event)">
           </div>
@@ -226,7 +227,7 @@
     let editingId     = null;
     let unknownInForm = new Set();   // "не знаю" fields in add form
     let unknownInEdit = new Set();   // "не знаю" fields in edit form
-    let currentTab    = 'text';
+    let currentTab    = 'main';
     let currentPhotoBase64 = null;
     let currentPhotoType   = null;
 
@@ -687,13 +688,19 @@ function getDefaultMealName() {
 
     function switchTab(tab) {
       currentTab = tab;
-      ['text','photo','manual'].forEach(t => {
+      ['main','manual'].forEach(t => {
         document.getElementById(`panel-${t}`).classList.toggle('hidden', t !== tab);
         const btn = document.getElementById(`tab-${t}`);
         if (t === tab) { btn.classList.add('bg-white','shadow','text-[#3A5235]'); btn.classList.remove('text-gray-500'); }
         else           { btn.classList.remove('bg-white','shadow','text-[#3A5235]'); btn.classList.add('text-gray-500'); }
       });
       setStatus('');
+    }
+
+    function removePhotoAttachment() {
+      currentPhotoBase64 = null; currentPhotoType = null;
+      document.getElementById('photoAttached').classList.add('hidden');
+      document.getElementById('photoInput').value = '';
     }
 
     function handlePhotoSelect(event) {
@@ -718,8 +725,8 @@ function getDefaultMealName() {
           const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
           const [, data] = dataUrl.split(',');
           currentPhotoBase64 = data; currentPhotoType = 'image/jpeg';
-          document.getElementById('photoPlaceholder').classList.add('hidden');
-          const p = document.getElementById('photoPreview'); p.src = dataUrl; p.classList.remove('hidden');
+          document.getElementById('photoPreview').src = dataUrl;
+          document.getElementById('photoAttached').classList.remove('hidden');
         };
         img.src = e.target.result;
       };
@@ -757,30 +764,42 @@ function getDefaultMealName() {
     async function addEntry() {
       setStatus(''); let entry;
       try {
-        if (currentTab === 'text') {
+        if (currentTab === 'main') {
           const text = document.getElementById('textInput').value.trim();
-          if (!text) { setStatus('Напиши, что съела', true); return; }
+          const hasPhoto = !!currentPhotoBase64;
+          if (!text && !hasPhoto) { setStatus('Напиши описание или прикрепи фото', true); return; }
           setLoading(true);
-          const parsed = extractJson(await callAI([{ text }]));
+
+          let parts;
+          if (hasPhoto && text) {
+            parts = [
+              { inline_data: { mime_type: currentPhotoType, data: currentPhotoBase64 } },
+              { text: `${text}\nОпредели КБЖУ. Добавь поле "description" с кратким описанием блюда (1-2 предложения на русском).` },
+            ];
+          } else if (hasPhoto) {
+            parts = [
+              { inline_data: { mime_type: currentPhotoType, data: currentPhotoBase64 } },
+              { text: 'Определи КБЖУ для еды на фото. Добавь поле "description" с кратким описанием блюда (1-2 предложения на русском).' },
+            ];
+          } else {
+            parts = [{ text }];
+          }
+
+          const parsed = extractJson(await callAI(parts));
           parsed.name = autoMealName(parsed.calories);
-          entry = makeEntry(parsed, { type: 'text', content: text });
+
+          let source;
+          if (hasPhoto) {
+            const thumb = await resizePhoto(currentPhotoBase64, currentPhotoType);
+            source = { type: 'photo', content: thumb };
+          } else {
+            source = { type: 'text', content: text };
+          }
+          entry = makeEntry(parsed, source);
+
           document.getElementById('textInput').value = '';
           delete draftsByDate[viewDate];
-
-        } else if (currentTab === 'photo') {
-          if (!currentPhotoBase64) { setStatus('Выбери фото', true); return; }
-          setLoading(true);
-          const parsedPhoto = extractJson(await callAI([
-            { inline_data: { mime_type: currentPhotoType, data: currentPhotoBase64 } },
-            { text: 'Определи КБЖУ для еды на фото. Добавь поле "description" с кратким описанием блюда (1-2 предложения на русском).' },
-          ]));
-          parsedPhoto.name = autoMealName(parsedPhoto.calories);
-          const thumb = await resizePhoto(currentPhotoBase64, currentPhotoType);
-          entry = makeEntry(parsedPhoto, { type: 'photo', content: thumb });
-          currentPhotoBase64 = null; currentPhotoType = null;
-          document.getElementById('photoPlaceholder').classList.remove('hidden');
-          document.getElementById('photoPreview').classList.add('hidden');
-          document.getElementById('photoInput').value = '';
+          if (hasPhoto) removePhotoAttachment();
 
         } else {
           const name = autoMealName(null);
