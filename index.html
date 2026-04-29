@@ -116,20 +116,22 @@
       <!-- Left column: today -->
       <div id="leftColumn" class="min-w-0">
 
-        <!-- Summary (rendered by JS) -->
-        <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
-          <div class="flex items-center justify-between mb-4">
-            <button onclick="changeDay(-1)" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">&#8592;</button>
-            <div class="flex items-center gap-1.5">
-              <div class="text-xs text-gray-500 font-medium" id="dateDisplay"></div>
-              <div class="relative">
-                <span class="text-gray-400 hover:text-[#B8975A] transition-colors text-base leading-none cursor-pointer" title="Выбрать дату">&#128197;</span>
-                <input type="date" id="datePicker" onchange="jumpToDate(this.value)"
-                  class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
-              </div>
+        <!-- Date navigation -->
+        <div class="flex items-center justify-between mb-3 px-1">
+          <button onclick="changeDay(-1)" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors">&#8592;</button>
+          <div class="flex items-center gap-1.5">
+            <div class="text-sm font-medium text-[#2C3A2D]" id="dateDisplay"></div>
+            <div class="relative">
+              <span class="text-gray-400 hover:text-[#B8975A] transition-colors text-base leading-none cursor-pointer" title="Выбрать дату">&#128197;</span>
+              <input type="date" id="datePicker" onchange="jumpToDate(this.value)"
+                class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
             </div>
-            <button onclick="changeDay(1)" id="btnNextDay" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-25 disabled:cursor-default">&#8594;</button>
           </div>
+          <button onclick="changeDay(1)" id="btnNextDay" class="text-gray-400 hover:text-gray-600 px-2 py-1 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-25 disabled:cursor-default">&#8594;</button>
+        </div>
+
+        <!-- Summary card -->
+        <div class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
           <div id="summaryContent"></div>
         </div>
 
