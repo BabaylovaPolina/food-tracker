@@ -135,19 +135,6 @@
 
         <!-- Input card -->
         <div id="inputCard" class="bg-white rounded-2xl p-4 mb-4 shadow-sm border border-[#E5DDD2]">
-          <!-- Meal name + suggestions -->
-          <div class="mb-3">
-            <div class="flex gap-1.5 flex-wrap mb-2">
-              <button onclick="setMealName('Завтрак')" id="suggest-Завтрак" class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Завтрак</button>
-              <button onclick="setMealName('Обед')"    id="suggest-Обед"    class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Обед</button>
-              <button onclick="setMealName('Ужин')"    id="suggest-Ужин"    class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Ужин</button>
-              <button onclick="setMealName('Перекус')" id="suggest-Перекус" class="px-3 py-1 rounded-full text-xs font-medium transition-colors bg-[#F5F1EB] text-[#3A5235] hover:bg-[#E5DDD2]">Перекус</button>
-            </div>
-            <input type="text" id="mealName" placeholder="Или введи своё название"
-              oninput="updateSuggestionButtons()"
-              class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#B8975A]">
-          </div>
-
           <div class="flex items-center gap-2 mb-3">
             <span class="text-xs text-gray-400 shrink-0">Время:</span>
             <input type="time" id="timeStart"
@@ -648,9 +635,7 @@
       return _fmt(d.getFullYear(), d.getMonth() + 1, d.getDate());
     }
 
-    const SUGGESTIONS = ['Завтрак', 'Обед', 'Ужин', 'Перекус'];
-
-    function getDefaultMealName() {
+function getDefaultMealName() {
       const h = new Date().getHours();
       const t = userProfile.mealTimes || DEFAULT_MEAL_TIMES;
       if (h >= t.Завтрак && h < t.Обед) return 'Завтрак';
@@ -659,28 +644,13 @@
       return '';
     }
 
-    function setMealName(name) {
-      const inp = document.getElementById('mealName');
-      inp.value = inp.value === name ? '' : name;
-      updateSuggestionButtons();
-    }
-
-    function updateSuggestionButtons() {
-      const val = document.getElementById('mealName').value;
-      SUGGESTIONS.forEach(s => {
-        const btn = document.getElementById(`suggest-${s}`);
-        if (!btn) return;
-        const active = val === s;
-        btn.classList.toggle('bg-[#2C3A2D]', active);
-        btn.classList.toggle('text-white',  active);
-        btn.classList.toggle('bg-[#F5F1EB]',  !active);
-        btn.classList.toggle('text-[#3A5235]', !active);
-      });
+    function autoMealName(calories) {
+      const timeName = getDefaultMealName();
+      if (calories !== null && calories < 250) return 'Перекус';
+      return timeName || 'Перекус';
     }
 
     function resetMealName() {
-      document.getElementById('mealName').value = getDefaultMealName();
-      updateSuggestionButtons();
       const now = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
       const timeInput = document.getElementById('timeStart');
       if (timeInput) timeInput.value = now;
@@ -807,7 +777,7 @@
           if (!text) { setStatus('Напиши, что съела', true); return; }
           setLoading(true);
           const parsed = extractJson(await callAI([{ text }]));
-          parsed.name = document.getElementById('mealName').value.trim() || parsed.name;
+          parsed.name = autoMealName(parsed.calories);
           entry = makeEntry(parsed, { type: 'text', content: text });
           document.getElementById('textInput').value = '';
           delete draftsByDate[viewDate];
@@ -819,7 +789,7 @@
             { inline_data: { mime_type: currentPhotoType, data: currentPhotoBase64 } },
             { text: 'Определи КБЖУ для еды на фото. Добавь поле "description" с кратким описанием блюда (1-2 предложения на русском).' },
           ]));
-          parsedPhoto.name = document.getElementById('mealName').value.trim() || parsedPhoto.name;
+          parsedPhoto.name = autoMealName(parsedPhoto.calories);
           const thumb = await resizePhoto(currentPhotoBase64, currentPhotoType);
           entry = makeEntry(parsedPhoto, { type: 'photo', content: thumb });
           currentPhotoBase64 = null; currentPhotoType = null;
@@ -828,7 +798,7 @@
           document.getElementById('photoInput').value = '';
 
         } else {
-          const name = document.getElementById('mealName').value.trim() || 'Приём пищи';
+          const name = autoMealName(null);
           const vals = {};
           let hasAny = false;
           getTrackedMacros().forEach(m => {
