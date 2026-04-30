@@ -168,6 +168,21 @@
             Добавить
           </button>
           <div id="statusMsg" class="hidden text-center text-xs mt-2"></div>
+
+          <!-- Water quick-add -->
+          <div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+            <span class="text-sm">💧</span>
+            <div class="flex gap-1">
+              <button onclick="addWater(100)"  class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#EDF3F8] text-[#3A6880] hover:bg-[#D8EAF4] transition-colors">100</button>
+              <button onclick="addWater(200)"  class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#EDF3F8] text-[#3A6880] hover:bg-[#D8EAF4] transition-colors">200</button>
+              <button onclick="addWater(250)"  class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#EDF3F8] text-[#3A6880] hover:bg-[#D8EAF4] transition-colors">250</button>
+              <button onclick="addWater(500)"  class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#EDF3F8] text-[#3A6880] hover:bg-[#D8EAF4] transition-colors">500</button>
+            </div>
+            <input type="number" id="waterInput" placeholder="мл" min="1" max="5000"
+              class="w-16 border border-gray-200 rounded-lg px-2 py-1 text-xs text-center focus:outline-none focus:ring-1 focus:ring-[#4A7FA5]">
+            <button onclick="addWaterCustom()"
+              class="px-2.5 py-1 rounded-lg text-xs font-medium bg-[#EDF3F8] text-[#3A6880] hover:bg-[#D8EAF4] transition-colors">+</button>
+          </div>
         </div>
 
         <div id="foodLog" class="space-y-2 transition-opacity"></div>
@@ -646,6 +661,20 @@ function getDefaultMealName() {
     }
 
     function resetMealName() {}
+
+    async function addWater(ml) {
+      const entry = makeEntry({ name: 'Вода', water: ml });
+      dayEntries.push(entry);
+      await saveDay(); renderLog(); updateTotals();
+      setStatus(`+${ml} мл воды`);
+    }
+
+    function addWaterCustom() {
+      const val = parseInt(document.getElementById('waterInput').value);
+      if (!val || val <= 0) return;
+      document.getElementById('waterInput').value = '';
+      addWater(val);
+    }
 
     function jumpToDate(dateStr) {
       if (!dateStr || dateStr > getToday()) return;
