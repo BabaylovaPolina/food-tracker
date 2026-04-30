@@ -995,10 +995,10 @@ function getDefaultMealName() {
     }
 
     function renderViewCard(e) {
-      const tracked = getTrackedMacros();
+      const tracked = getTrackedMacros().filter(m => e[m.key] !== null && e[m.key] !== 0);
       const macroBoxes = tracked.map(m => {
         const val = e[m.key];
-        const display = val === null ? '<span class="text-gray-300">—</span>' : `${val}${m.unit === 'ккал' ? '' : 'г'}`;
+        const display = `${val}${m.unit === 'ккал' ? '' : 'г'}`;
         return `<div class="${m.bg} rounded-lg p-1.5 text-center">
           <div class="text-sm font-semibold ${m.text}">${display}</div>
           <div class="text-xs text-gray-400">${m.label.toLowerCase()}</div>
